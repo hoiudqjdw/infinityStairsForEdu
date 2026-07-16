@@ -7,3 +7,8 @@
 
 효과음/BGM 갖고올 프로젝트: https://github.com/choijoohee213/Infinite-Stairs.git
 
+## 파일 구조
+
+초등학생들이 쉽게 열어서 수정할 수 있도록 HTML/CSS/JS를 `index.html` 한 파일에 모두 합쳐뒀습니다.
+(`<style>` 태그 안에 CSS, `<script>` 태그 안에 JS가 들어있습니다.) 사운드 파일만 `audio/` 폴더에 따로 있습니다.
+
