@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>무한의 계단 - 클론</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="stage">
+    <canvas id="game"></canvas>
+
+    <div id="hud">
+      <div id="gaugeWrap">
+        <div id="gaugeFill"></div>
+      </div>
+      <div id="floorLabel"><span id="floorNum">0</span><small>층</small></div>
+      <button id="btnMute" aria-label="음소거 전환">🔊</button>
+    </div>
+
+    <div id="controls">
+      <button id="btnLeft" class="ctrlBtn" aria-label="왼쪽">◀</button>
+      <button id="btnRight" class="ctrlBtn" aria-label="오른쪽">▶</button>
+    </div>
+
+    <div id="startScreen" class="overlay">
+      <h1>무한의 계단</h1>
+      <p>계단이 꺾이는 방향에 맞춰<br>왼쪽 / 오른쪽 버튼을 누르세요!</p>
+      <p class="small">방향키(← →)로도 조작할 수 있어요</p>
+      <button id="btnStart" class="bigBtn">시작하기</button>
+    </div>
+
+    <div id="gameOverScreen" class="overlay hidden">
+      <h1 id="gameOverTitle">시간 초과!</h1>
+      <p class="resultFloor"><span id="finalFloor">0</span>층 도달</p>
+      <button id="btnRetry" class="bigBtn">다시하기</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #14161f;
+  overflow: hidden;
+  font-family: "Courier New", ui-monospace, monospace;
+  touch-action: none;
+}
+
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  background: #202331;
+  overflow: hidden;
+  image-rendering: pixelated;
+}
+
+canvas#game {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* ---------- HUD ---------- */
+#hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+#gaugeWrap {
+  flex: 1;
+  height: 20px;
+  background: #1a1c26;
+  border: 3px solid #0d0e14;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 0 rgba(0,0,0,.4);
+}
+
+#gaugeFill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(180deg, #ff8a4c, #e8482a);
+  transition: width 0.12s linear;
+}
+
+#floorLabel {
+  background: #ffe9a8;
+  border: 3px solid #7a5a1e;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-weight: bold;
+  color: #4a3210;
+  font-size: 20px;
+  min-width: 64px;
+  text-align: center;
+}
+
+#floorLabel small {
+  font-size: 12px;
+  margin-left: 2px;
+}
+
+#btnMute {
+  pointer-events: auto;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: 3px solid #0d0e14;
+  border-radius: 8px;
+  background: #3a3f58;
+  color: #fff8e8;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#btnMute:active {
+  background: #232636;
+}
+
+/* ---------- Controls ---------- */
+#controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22%;
+  min-height: 110px;
+  display: flex;
+  z-index: 5;
+}
+
+.ctrlBtn {
+  flex: 1;
+  border: none;
+  font-size: 42px;
+  font-weight: bold;
+  color: #fff8e8;
+  background: #3a3f58;
+  border-top: 4px solid #545a78;
+  cursor: pointer;
+  transition: background 0.05s;
+}
+
+.ctrlBtn:active,
+.ctrlBtn.pressed {
+  background: #232636;
+}
+
+#btnLeft {
+  border-right: 2px solid #14161f;
+}
+
+#btnRight {
+  border-left: 2px solid #14161f;
+}
+
+/* ---------- Overlays ---------- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgba(10, 11, 18, 0.86);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff8e8;
+  padding: 24px;
+  gap: 10px;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay h1 {
+  font-size: 28px;
+  margin: 0 0 6px;
+  color: #ffd25a;
+  text-shadow: 2px 2px 0 #7a4a10;
+}
+
+.overlay p {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+.overlay p.small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.resultFloor {
+  font-size: 22px !important;
+}
+
+.resultFloor span {
+  font-size: 40px;
+  color: #ffd25a;
+  font-weight: bold;
+}
+
+.bigBtn {
+  margin-top: 16px;
+  padding: 14px 36px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #4a3210;
+  background: #ffd25a;
+  border: 4px solid #b8871f;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.bigBtn:active {
+  transform: translateY(2px);
+}
