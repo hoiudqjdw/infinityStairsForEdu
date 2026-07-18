@@ -387,7 +387,7 @@ canvas#game {
     let steps = [];
     let currentIndex = 0;
     let curDir = "R";
-    let runRemaining = 3;
+    let runRemaining = 0;
 
     let charPos = { x: 0, y: 0 };
     let animFrom = null, animTo = null, animStart = 0, animKind = null;
@@ -442,11 +442,17 @@ canvas#game {
     }
 
     function genNextStep(prev) {
+      // runRemaining이 0이면 새로운 방향과 길이를 결정
       if (runRemaining <= 0) {
-        curDir = curDir === "R" ? "L" : "R";
-        const maxRun = Math.max(2, 5 - Math.floor(floor / 40));
-        runRemaining = 2 + Math.floor(Math.random() * (maxRun - 1));
+        // 현재 방향을 무작위로 선택 (L 또는 R)
+        curDir = Math.random() < 0.5 ? "L" : "R";
+        
+        // 층이 높아질수록 더 긴 런을 가능하게 (더 다양한 패턴)
+        const minRun = 2;
+        const maxRun = Math.min(8, 3 + Math.floor(floor / 50));
+        runRemaining = minRun + Math.floor(Math.random() * (maxRun - minRun + 1));
       }
+      
       runRemaining--;
       const dx = curDir === "R" ? STEP_DX : -STEP_DX;
       return { x: prev.x + dx, y: prev.y - STEP_DY, dir: curDir };
@@ -462,7 +468,7 @@ canvas#game {
       steps = [makeStartStep()];
       currentIndex = 0;
       curDir = Math.random() < 0.5 ? "L" : "R";
-      runRemaining = 3;
+      runRemaining = 0;
       ensureBuffer();
 
       charPos = { x: steps[0].x, y: steps[0].y };
@@ -605,7 +611,7 @@ canvas#game {
 
       elapsedPlaying += dt;
       
-      // 8층마다 빨라지고, 400층에서 최대 속도에 도달 (floor / 8 = 50)
+      // 8층마다 빨라지고, 400층에서 최대 속도에 도달
       const additionalDrain = Math.min(50, floor / 8);
       const rate = BASE_DRAIN_RATE + additionalDrain;
       
