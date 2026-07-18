@@ -378,8 +378,8 @@ canvas#game {
     const STUMBLE_MS = 220;
 
     const TIME_MAX = 100;
-    const BASE_DRAIN_RATE = 9;   // 기본 닳기 속도
-    const TIME_BONUS = 7;        // 정확한 스텝 보너스
+    const BASE_DRAIN_RATE = 9;
+    const TIME_BONUS = 7;
 
     // ---------- Game state ----------
     let state = "modeSelect";
@@ -605,10 +605,8 @@ canvas#game {
 
       elapsedPlaying += dt;
       
-      // 높이에 따라 점점 빨라지는 타임바 감소 속도
-      // 처음: BASE_DRAIN_RATE (9)
-      // 층이 높아질수록: 최대 16까지 증가 (BASE_DRAIN_RATE + 7)
-      const additionalDrain = Math.min(7, floor / 15);
+      // 8층마다 빨라지고, 136층에서 최대 속도에 도달 (floor / 8 = 25)
+      const additionalDrain = Math.min(25, floor / 8);
       const rate = BASE_DRAIN_RATE + additionalDrain;
       
       timeLeft = Math.max(0, timeLeft - rate * dt);
