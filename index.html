@@ -251,6 +251,7 @@ canvas#game {
   gap: 20px;
   justify-content: center;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .modeBtn {
@@ -296,8 +297,125 @@ canvas#game {
   transform: translateY(2px);
 }
 
+#btnThief {
+  background: #d84a3a;
+  color: #fff8e8;
+  border-color: #a83a2a;
+}
+
+#btnThief:hover {
+  background: #e85a4a;
+}
+
+#btnThief:active {
+  transform: translateY(2px);
+}
+
 .modeBtn span {
   font-size: 40px;
+}
+
+/* ---------- Difficulty Selection ---------- */
+#difficultySelection {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgba(6, 7, 12, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff8e8;
+  padding: 24px;
+  gap: 30px;
+}
+
+#difficultySelection.hidden {
+  display: none;
+}
+
+#difficultySelection h1 {
+  font-size: 32px;
+  margin: 0;
+  color: #ffd25a;
+  text-shadow: 2px 2px 0 #7a4a10;
+}
+
+#difficultySliderContainer {
+  width: 100%;
+  max-width: 300px;
+}
+
+#difficultyLabel {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #ffd25a;
+}
+
+#difficultySlider {
+  width: 100%;
+  height: 8px;
+  border-radius: 5px;
+  background: #3a3f58;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+#difficultySlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffd25a;
+  cursor: pointer;
+  border: 3px solid #b8871f;
+}
+
+#difficultySlider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffd25a;
+  cursor: pointer;
+  border: 3px solid #b8871f;
+}
+
+#difficultyValue {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ffd25a;
+  margin-top: 15px;
+}
+
+#difficultyDescription {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 10px;
+}
+
+#btnStartThief {
+  padding: 14px 36px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #4a3210;
+  background: #ffd25a;
+  border: 4px solid #b8871f;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+  margin-top: 20px;
+}
+
+#btnStartThief:hover {
+  background: #ffe566;
+}
+
+#btnStartThief:active {
+  transform: translateY(2px);
 }
 </style>
 </head>
@@ -320,7 +438,7 @@ canvas#game {
 
     <div id="modeSelection" class="overlay">
       <h1>무한의 계단</h1>
-      <p>시간대를 선택하세요</p>
+      <p>모드를 선택하세요</p>
       <div id="modeButtons">
         <button id="btnDay" class="modeBtn">
           <span>☀️</span>
@@ -330,7 +448,22 @@ canvas#game {
           <span>🌙</span>
           <div>밤</div>
         </button>
+        <button id="btnThief" class="modeBtn">
+          <span>🔴</span>
+          <div>도둑잡기</div>
+        </button>
       </div>
+    </div>
+
+    <div id="difficultySelection" class="overlay hidden">
+      <h1>도둑잡기</h1>
+      <div id="difficultySliderContainer">
+        <div id="difficultyLabel">난이도 선택</div>
+        <input type="range" id="difficultySlider" min="1" max="10" value="5">
+        <div id="difficultyValue">5</div>
+        <div id="difficultyDescription">난이도가 높을수록 도둑이 빠릅니다</div>
+      </div>
+      <button id="btnStartThief" class="bigBtn">시작하기</button>
     </div>
 
     <div id="startScreen" class="overlay hidden">
@@ -384,17 +517,20 @@ canvas#game {
     // ---------- Game state ----------
     let state = "modeSelect";
     let gameMode = null;
+    let thiefDifficulty = 5;
     let steps = [];
     let currentIndex = 0;
     let curDir = "R";
     let runRemaining = 0;
 
     let charPos = { x: 0, y: 0 };
+    let thiefPos = { x: 0, y: 0 };
     let animFrom = null, animTo = null, animStart = 0, animKind = null;
     let isAnimating = false;
 
     let timeLeft = TIME_MAX;
     let floor = 0;
+    let thiefFloor = 10;
     let elapsedPlaying = 0;
     let lastTime = 0;
 
@@ -442,12 +578,8 @@ canvas#game {
     }
 
     function genNextStep(prev) {
-      // runRemaining이 0이면 새로운 방향과 길이를 결정
       if (runRemaining <= 0) {
-        // 현재 방향을 무작위로 선택 (L 또는 R)
         curDir = Math.random() < 0.5 ? "L" : "R";
-        
-        // 매우 짧은 구간 (1-4칸) - 자주 꺾임
         const minRun = 1;
         const maxRun = Math.min(4, 2 + Math.floor(floor / 100));
         runRemaining = minRun + Math.floor(Math.random() * (maxRun - minRun + 1));
@@ -472,6 +604,8 @@ canvas#game {
       ensureBuffer();
 
       charPos = { x: steps[0].x, y: steps[0].y };
+      thiefPos = { x: steps[10].x, y: steps[10].y };
+      thiefFloor = 10;
       animFrom = animTo = null;
       isAnimating = false;
 
@@ -502,10 +636,19 @@ canvas#game {
 
         currentIndex++;
         floor++;
-        timeLeft = Math.min(TIME_MAX, timeLeft + TIME_BONUS);
+        
+        if (gameMode !== "thief") {
+          timeLeft = Math.min(TIME_MAX, timeLeft + TIME_BONUS);
+        }
+        
         ensureBuffer();
         updateFloorLabel();
         playSfx("step");
+        
+        // 도둑잡기 모드: 도둑에게 도달했는지 확인
+        if (gameMode === "thief" && floor >= thiefFloor) {
+          triggerGameWin();
+        }
       } else {
         animFrom = { x: charPos.x, y: charPos.y };
         animTo = { x: charPos.x + (pressedDir === "R" ? 10 : -10), y: charPos.y };
@@ -549,11 +692,38 @@ canvas#game {
 
     const btnDay = document.getElementById("btnDay");
     const btnNight = document.getElementById("btnNight");
+    const btnThief = document.getElementById("btnThief");
 
     btnDay.addEventListener("click", () => { playSfx("click"); selectMode("day"); });
     btnNight.addEventListener("click", () => { playSfx("click"); selectMode("night"); });
+    btnThief.addEventListener("click", () => { playSfx("click"); selectMode("thief"); });
+
+    const difficultySlider = document.getElementById("difficultySlider");
+    const difficultyValue = document.getElementById("difficultyValue");
+
+    difficultySlider.addEventListener("input", (e) => {
+      thiefDifficulty = parseInt(e.target.value);
+      difficultyValue.textContent = thiefDifficulty;
+    });
+
+    document.getElementById("btnStartThief").addEventListener("click", () => {
+      playSfx("click");
+      state = "playing";
+      gameMode = "thief";
+      document.getElementById("difficultySelection").classList.add("hidden");
+      resetGame();
+      bgm.currentTime = 0;
+      if (!muted) bgm.play().catch(() => {});
+    });
 
     function selectMode(mode) {
+      if (mode === "thief") {
+        state = "difficultySelect";
+        document.getElementById("modeSelection").classList.add("hidden");
+        document.getElementById("difficultySelection").classList.remove("hidden");
+        return;
+      }
+      
       gameMode = mode;
       state = "start";
       document.getElementById("modeSelection").classList.add("hidden");
@@ -565,6 +735,7 @@ canvas#game {
       state = "modeSelect";
       document.getElementById("startScreen").classList.add("hidden");
       document.getElementById("gameOverScreen").classList.add("hidden");
+      document.getElementById("difficultySelection").classList.add("hidden");
       document.getElementById("modeSelection").classList.remove("hidden");
     }
 
@@ -582,7 +753,17 @@ canvas#game {
       state = "gameover";
       document.getElementById("finalFloor").textContent = floor;
       document.getElementById("gameOverTitle").textContent =
-        reason === "miss" ? "헛디뎠다!" : "시간 초과!";
+        reason === "miss" ? "헛디뎠다!" : (reason === "time" ? "시간 초과!" : "도둑에게 붙잡혔습니다!");
+      document.getElementById("gameOverScreen").classList.remove("hidden");
+      bgm.pause();
+      playSfx("gameover");
+    }
+
+    function triggerGameWin() {
+      if (state !== "playing") return;
+      state = "gameover";
+      document.getElementById("finalFloor").textContent = floor;
+      document.getElementById("gameOverTitle").textContent = "도둑을 잡았습니다!";
       document.getElementById("gameOverScreen").classList.remove("hidden");
       bgm.pause();
       playSfx("gameover");
@@ -601,8 +782,13 @@ canvas#game {
           ? "linear-gradient(180deg, #ffcf5c, #d68a1f)"
           : "linear-gradient(180deg, #7ee88a, #2fa84a)";
     }
+    
     function updateFloorLabel() {
-      floorNumEl.textContent = floor;
+      if (gameMode === "thief") {
+        floorNumEl.textContent = floor + " / " + thiefFloor;
+      } else {
+        floorNumEl.textContent = floor;
+      }
     }
 
     // ---------- Update ----------
@@ -611,16 +797,29 @@ canvas#game {
 
       elapsedPlaying += dt;
       
-      // 8층마다 빨라지고, 400층에서 최대 속도에 도달
-      const additionalDrain = Math.min(50, floor / 8);
-      const rate = BASE_DRAIN_RATE + additionalDrain;
-      
-      timeLeft = Math.max(0, timeLeft - rate * dt);
-      updateGauge();
+      if (gameMode === "thief") {
+        // 도둑잡기 모드
+        thiefFloor = Math.floor(10 + (thiefDifficulty * elapsedPlaying * 0.5));
+        
+        // 도둑이 150층 도달 시 실패
+        if (thiefFloor >= 150) {
+          triggerGameOver("thief");
+          return;
+        }
 
-      if (timeLeft <= 0) {
-        triggerGameOver("time");
-        return;
+        thiefPos = steps[thiefFloor] ? { x: steps[thiefFloor].x, y: steps[thiefFloor].y } : { x: 0, y: 0 };
+      } else {
+        // 일반 모드
+        const additionalDrain = Math.min(50, floor / 8);
+        const rate = BASE_DRAIN_RATE + additionalDrain;
+        
+        timeLeft = Math.max(0, timeLeft - rate * dt);
+        updateGauge();
+
+        if (timeLeft <= 0) {
+          triggerGameOver("time");
+          return;
+        }
       }
 
       if (isAnimating) {
@@ -677,6 +876,7 @@ canvas#game {
     };
 
     function getColors() {
+      if (gameMode === "thief") return COLORS_DAY;
       return gameMode === "day" ? COLORS_DAY : COLORS_NIGHT;
     }
 
@@ -695,7 +895,7 @@ canvas#game {
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, viewW, viewH);
 
-      if (gameMode === "night") {
+      if (gameMode !== "thief" && gameMode === "night") {
         ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
         for (let s = 0; s < 20; s++) {
           let sx = (s * 53 + 10) % viewW;
@@ -723,57 +923,24 @@ canvas#game {
       }
 
       const parallax1 = camera.y * 0.25;
-      if (gameMode === "night") {
-        drawTreeGroup(-200, viewH - 150 + (parallax1 % 300), 
-                      ["#0a1a10", "#081410", "#06120c"], 0.3, 50, 12);
-        drawTreeGroup(100, viewH - 140 + (parallax1 % 300),
-                      ["#0a1a10", "#081410", "#06120c"], 0.3, 45, 10);
-        drawTreeGroup(350, viewH - 160 + (parallax1 % 300),
-                      ["#0a1a10", "#081410", "#06120c"], 0.3, 55, 14);
-      } else {
-        drawTreeGroup(-200, viewH - 150 + (parallax1 % 300), 
-                      ["#2d5a1f", "#1f4a15", "#15380d"], 0.3, 50, 12);
-        drawTreeGroup(100, viewH - 140 + (parallax1 % 300),
-                      ["#2d5a1f", "#1f4a15", "#15380d"], 0.3, 45, 10);
-        drawTreeGroup(350, viewH - 160 + (parallax1 % 300),
-                      ["#2d5a1f", "#1f4a15", "#15380d"], 0.3, 55, 14);
-      }
+      const treeColors1 = (gameMode === "night") ? ["#0a1a10", "#081410", "#06120c"] : ["#2d5a1f", "#1f4a15", "#15380d"];
+      drawTreeGroup(-200, viewH - 150 + (parallax1 % 300), treeColors1, 0.3, 50, 12);
+      drawTreeGroup(100, viewH - 140 + (parallax1 % 300), treeColors1, 0.3, 45, 10);
+      drawTreeGroup(350, viewH - 160 + (parallax1 % 300), treeColors1, 0.3, 55, 14);
 
       const parallax2 = camera.y * 0.4;
-      if (gameMode === "night") {
-        drawTreeGroup(-150, viewH - 100 + (parallax2 % 300),
-                      ["#1a3a1a", "#0f2a0f", "#0a2008"], 0.5, 60, 16);
-        drawTreeGroup(80, viewH - 90 + (parallax2 % 300),
-                      ["#1a3a1a", "#0f2a0f", "#0a2008"], 0.5, 55, 14);
-        drawTreeGroup(320, viewH - 110 + (parallax2 % 300),
-                      ["#1a3a1a", "#0f2a0f", "#0a2008"], 0.5, 65, 18);
-      } else {
-        drawTreeGroup(-150, viewH - 100 + (parallax2 % 300),
-                      ["#4a8a3a", "#3a7a2a", "#2a6a1a"], 0.5, 60, 16);
-        drawTreeGroup(80, viewH - 90 + (parallax2 % 300),
-                      ["#4a8a3a", "#3a7a2a", "#2a6a1a"], 0.5, 55, 14);
-        drawTreeGroup(320, viewH - 110 + (parallax2 % 300),
-                      ["#4a8a3a", "#3a7a2a", "#2a6a1a"], 0.5, 65, 18);
-      }
+      const treeColors2 = (gameMode === "night") ? ["#1a3a1a", "#0f2a0f", "#0a2008"] : ["#4a8a3a", "#3a7a2a", "#2a6a1a"];
+      drawTreeGroup(-150, viewH - 100 + (parallax2 % 300), treeColors2, 0.5, 60, 16);
+      drawTreeGroup(80, viewH - 90 + (parallax2 % 300), treeColors2, 0.5, 55, 14);
+      drawTreeGroup(320, viewH - 110 + (parallax2 % 300), treeColors2, 0.5, 65, 18);
 
       const parallax3 = camera.y * 0.55;
-      if (gameMode === "night") {
-        drawTreeGroup(-100, viewH - 30 + (parallax3 % 300),
-                      ["#2a4a2a", "#1a3a1a", "#0f2f0f"], 0.7, 70, 20);
-        drawTreeGroup(150, viewH - 20 + (parallax3 % 300),
-                      ["#2a4a2a", "#1a3a1a", "#0f2f0f"], 0.7, 75, 22);
-        drawTreeGroup(400, viewH - 40 + (parallax3 % 300),
-                      ["#2a4a2a", "#1a3a1a", "#0f2f0f"], 0.7, 80, 24);
-      } else {
-        drawTreeGroup(-100, viewH - 30 + (parallax3 % 300),
-                      ["#5aaa4a", "#4a9a3a", "#3a8a2a"], 0.7, 70, 20);
-        drawTreeGroup(150, viewH - 20 + (parallax3 % 300),
-                      ["#5aaa4a", "#4a9a3a", "#3a8a2a"], 0.7, 75, 22);
-        drawTreeGroup(400, viewH - 40 + (parallax3 % 300),
-                      ["#5aaa4a", "#4a9a3a", "#3a8a2a"], 0.7, 80, 24);
-      }
+      const treeColors3 = (gameMode === "night") ? ["#2a4a2a", "#1a3a1a", "#0f2f0f"] : ["#5aaa4a", "#4a9a3a", "#3a8a2a"];
+      drawTreeGroup(-100, viewH - 30 + (parallax3 % 300), treeColors3, 0.7, 70, 20);
+      drawTreeGroup(150, viewH - 20 + (parallax3 % 300), treeColors3, 0.7, 75, 22);
+      drawTreeGroup(400, viewH - 40 + (parallax3 % 300), treeColors3, 0.7, 80, 24);
 
-      if (gameMode === "night") {
+      if (gameMode !== "thief" && gameMode === "night") {
         ctx.fillStyle = "rgba(255, 240, 100, 0.6)";
         for (let f = 0; f < 8; f++) {
           let fx = (f * 61 + 40) % viewW;
@@ -878,6 +1045,40 @@ canvas#game {
       ctx.restore();
     }
 
+    function drawThief() {
+      const p = worldToScreen(thiefPos.x, thiefPos.y);
+      
+      ctx.save();
+      ctx.translate(p.x, p.y - 30);
+
+      // 빨간 도둑 캐릭터
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(-8, 14, 6, 12);
+      ctx.fillRect(2, 14, 6, 12);
+
+      ctx.fillStyle = "#d84a3a";
+      ctx.fillRect(-9, -4, 18, 20);
+
+      ctx.fillStyle = "#8b0000";
+      ctx.fillRect(-2, -3, 4, 12);
+
+      ctx.fillStyle = "#c23a2a";
+      ctx.fillRect(-13, -2, 5, 12);
+      ctx.fillRect(8, -2, 5, 12);
+
+      ctx.fillStyle = "#f0c090";
+      ctx.fillRect(-8, -20, 16, 16);
+
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(-8, -22, 16, 5);
+
+      ctx.fillStyle = "#000";
+      ctx.fillRect(4, -13, 2, 2);
+      ctx.fillRect(-6, -13, 2, 2);
+
+      ctx.restore();
+    }
+
     function render() {
       ctx.save();
       if (shake > 0) {
@@ -891,6 +1092,10 @@ canvas#game {
       const lo = Math.max(0, currentIndex - 2);
       const hi = Math.min(steps.length - 1, currentIndex + 14);
       for (let i = lo; i <= hi; i++) drawStep(steps[i]);
+
+      if (gameMode === "thief" && thiefFloor >= 10 && thiefFloor < 150) {
+        drawThief();
+      }
 
       drawCharacter();
 
