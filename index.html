@@ -605,8 +605,8 @@ canvas#game {
 
       elapsedPlaying += dt;
       
-      // 8층마다 빨라지고, 136층에서 최대 속도에 도달 (floor / 8 = 25)
-      const additionalDrain = Math.min(25, floor / 8);
+      // 8층마다 빨라지고, 400층에서 최대 속도에 도달 (floor / 8 = 50)
+      const additionalDrain = Math.min(50, floor / 8);
       const rate = BASE_DRAIN_RATE + additionalDrain;
       
       timeLeft = Math.max(0, timeLeft - rate * dt);
