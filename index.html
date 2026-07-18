@@ -378,12 +378,12 @@ canvas#game {
     const STUMBLE_MS = 220;
 
     const TIME_MAX = 100;
-    const BASE_DRAIN_RATE = 9;
-    const TIME_BONUS = 7;
+    const BASE_DRAIN_RATE = 9;   // 기본 닳기 속도
+    const TIME_BONUS = 7;        // 정확한 스텝 보너스
 
     // ---------- Game state ----------
-    let state = "modeSelect"; // modeSelect | start | playing | gameover
-    let gameMode = null; // "day" or "night"
+    let state = "modeSelect";
+    let gameMode = null;
     let steps = [];
     let currentIndex = 0;
     let curDir = "R";
@@ -541,7 +541,6 @@ canvas#game {
     document.getElementById("btnStart").addEventListener("click", () => { playSfx("click"); startGame(); });
     document.getElementById("btnRetry").addEventListener("click", () => { playSfx("click"); backToModeSelect(); });
 
-    // 모드 선택
     const btnDay = document.getElementById("btnDay");
     const btnNight = document.getElementById("btnNight");
 
@@ -605,7 +604,13 @@ canvas#game {
       if (state !== "playing") return;
 
       elapsedPlaying += dt;
-      const rate = BASE_DRAIN_RATE + Math.min(6, floor / 30);
+      
+      // 높이에 따라 점점 빨라지는 타임바 감소 속도
+      // 처음: BASE_DRAIN_RATE (9)
+      // 층이 높아질수록: 최대 16까지 증가 (BASE_DRAIN_RATE + 7)
+      const additionalDrain = Math.min(7, floor / 15);
+      const rate = BASE_DRAIN_RATE + additionalDrain;
+      
       timeLeft = Math.max(0, timeLeft - rate * dt);
       updateGauge();
 
@@ -639,7 +644,6 @@ canvas#game {
     }
 
     // ---------- Rendering ----------
-    // 낮 테마 색상
     const COLORS_DAY = {
       sky1: "#87ceeb",
       sky2: "#e0f6ff",
@@ -654,7 +658,6 @@ canvas#game {
       tie: "#c23a3a",
     };
 
-    // 밤 테마 색상
     const COLORS_NIGHT = {
       sky1: "#0b0d1a",
       sky2: "#1c1e36",
@@ -689,7 +692,6 @@ canvas#game {
       ctx.fillRect(0, 0, viewW, viewH);
 
       if (gameMode === "night") {
-        // 밤: 별 그리기
         ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
         for (let s = 0; s < 20; s++) {
           let sx = (s * 53 + 10) % viewW;
@@ -697,18 +699,15 @@ canvas#game {
           ctx.fillRect(sx, sy, 2, 2);
         }
 
-        // 달 그리기
         ctx.fillStyle = "rgba(255, 240, 180, 0.6)";
         ctx.beginPath();
         ctx.arc(viewW * 0.8, viewH * 0.15, 25, 0, Math.PI * 2);
         ctx.fill();
       } else {
-        // 낮: 구름 그리기
         ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
         for (let c = 0; c < 5; c++) {
           let cx = (c * 100) % viewW;
           let cy = 30 + (c * 25) % 80;
-          // 구름 모양 (간단한 원들의 조합)
           ctx.fillRect(cx, cy, 40, 15);
           ctx.beginPath();
           ctx.arc(cx + 10, cy, 12, 0, Math.PI * 2);
@@ -719,7 +718,6 @@ canvas#game {
         }
       }
 
-      // 나무 그리기
       const parallax1 = camera.y * 0.25;
       if (gameMode === "night") {
         drawTreeGroup(-200, viewH - 150 + (parallax1 % 300), 
@@ -771,7 +769,6 @@ canvas#game {
                       ["#5aaa4a", "#4a9a3a", "#3a8a2a"], 0.7, 80, 24);
       }
 
-      // 밤: 반딧불이 효과
       if (gameMode === "night") {
         ctx.fillStyle = "rgba(255, 240, 100, 0.6)";
         for (let f = 0; f < 8; f++) {
