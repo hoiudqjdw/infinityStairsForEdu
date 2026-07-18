@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>무한의 계단 - 클론 (밤 모드)</title>
+<title>무한의 계단 - 숲속 밤</title>
 <style>
 * {
   box-sizing: border-box;
@@ -16,7 +16,7 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-  background: #0a0b12; /* 전체 배경을 조금 더 어둡게 변경 */
+  background: #0a0b12;
   overflow: hidden;
   font-family: "Courier New", ui-monospace, monospace;
   touch-action: none;
@@ -265,24 +265,24 @@ canvas#game {
     resize();
 
     // ---------- Constants ----------
-    const STEP_DX = 46;   // horizontal distance per step (world units)
-    const STEP_DY = 44;   // vertical rise per step
-    const ANIM_MS = 140;  // step animation duration
+    const STEP_DX = 46;
+    const STEP_DY = 44;
+    const ANIM_MS = 140;
     const STUMBLE_MS = 220;
 
-    const TIME_MAX = 100;        // timer bar units, full at game start
-    const BASE_DRAIN_RATE = 9;   // units/sec passively drained
-    const TIME_BONUS = 7;        // units restored per correct step
+    const TIME_MAX = 100;
+    const BASE_DRAIN_RATE = 9;
+    const TIME_BONUS = 7;
 
     // ---------- Game state ----------
-    let state = "start"; // start | playing | gameover
-    let steps = [];       // {x, y, dir}  dir: 'L' | 'R' — direction needed to step onto this from previous
+    let state = "start";
+    let steps = [];
     let currentIndex = 0;
     let curDir = "R";
     let runRemaining = 3;
 
-    let charPos = { x: 0, y: 0 };   // rendered (animated) position, world coords
-    let animFrom = null, animTo = null, animStart = 0, animKind = null; // 'move' | 'stumble'
+    let charPos = { x: 0, y: 0 };
+    let animFrom = null, animTo = null, animStart = 0, animKind = null;
     let isAnimating = false;
 
     let timeLeft = TIME_MAX;
@@ -380,7 +380,6 @@ canvas#game {
 
       const target = steps[currentIndex + 1];
       if (target.dir === pressedDir) {
-        // success
         animFrom = { x: charPos.x, y: charPos.y };
         animTo = { x: target.x, y: target.y };
         animStart = performance.now();
@@ -394,7 +393,6 @@ canvas#game {
         updateFloorLabel();
         playSfx("step");
       } else {
-        // miss — a single wrong step ends the run immediately
         animFrom = { x: charPos.x, y: charPos.y };
         animTo = { x: charPos.x + (pressedDir === "R" ? 10 : -10), y: charPos.y };
         animStart = performance.now();
@@ -486,7 +484,6 @@ canvas#game {
         return;
       }
 
-      // resolve animation
       if (isAnimating) {
         const t = Math.min(1, (performance.now() - animStart) / (animKind === "move" ? ANIM_MS : STUMBLE_MS));
         const ease = 1 - Math.pow(1 - t, 2);
@@ -504,7 +501,6 @@ canvas#game {
         }
       }
 
-      // camera follows character
       const followSpeed = 10;
       camera.x += (charPos.x - camera.x) * Math.min(1, followSpeed * dt);
       camera.y += (charPos.y - camera.y) * Math.min(1, followSpeed * dt);
@@ -513,16 +509,13 @@ canvas#game {
     }
 
     // ---------- Rendering ----------
-    // 밤 테마에 맞춰 배경 및 건물 색상 코드 전면 수정
     const COLORS = {
-      sky1: "#0b0d1a",        // 깊은 밤하늘 상단
-      sky2: "#1c1e36",        // 지평선 부근 은은한 밤하늘 하단
-      buildingA: "#181a2e",   // 원경 건물 (어두운 네이비)
-      buildingB: "#121424",   // 근경 건물 (더 어두운 실루엣)
-      brick: "#4a536b",       // 계단 블록 (달빛을 받는 느낌의 차분한 톤)
-      brickDark: "#2e3447",   // 계단 블록 어두운 면
-      brickLine: "#1e2230",   // 계단 라인
-      stepEdge: "#151821",    // 계단 테두리
+      sky1: "#0b0d1a",
+      sky2: "#1c1e36",
+      brick: "#4a536b",
+      brickDark: "#2e3447",
+      brickLine: "#1e2230",
+      stepEdge: "#151821",
       skin: "#f0c090",
       hair: "#2b2118",
       shirt: "#2f5fa8",
@@ -544,50 +537,85 @@ canvas#game {
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, viewW, viewH);
 
-      // 밤하늘에 작은 별들 그리기 (도트 감성 살리기)
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-      // 고정된 위치 느낌을 주기 위해 카메라 좌표를 활용한 간단한 별 무리 연산
-      for (let s = 0; s < 15; s++) {
-        let sx = (s * 45) % viewW;
-        let sy = (s * 73) % (viewH * 0.5);
+      // 별 그리기
+      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      for (let s = 0; s < 20; s++) {
+        let sx = (s * 53 + 10) % viewW;
+        let sy = (s * 89 + 20) % (viewH * 0.4);
         ctx.fillRect(sx, sy, 2, 2);
       }
 
-      // 실루엣 건물들에 불 켜진 창문 효과 추가 (야경 느낌 연출)
-      const parallax = camera.y * 0.35;
-      ctx.fillStyle = COLORS.buildingA;
-      for (let i = -2; i < 8; i++) {
-        const bw = 46;
-        const bx = (i * 70) - ((camera.x * 0.25 + 20) % 70);
-        const bh = 90 + ((i * 53) % 120);
-        const by = viewH - bh + (parallax % 200) - 100;
-        ctx.fillRect(bx, by, bw, bh + 400);
+      // 달 그리기
+      ctx.fillStyle = "rgba(255, 240, 180, 0.6)";
+      ctx.beginPath();
+      ctx.arc(viewW * 0.8, viewH * 0.15, 25, 0, Math.PI * 2);
+      ctx.fill();
 
-        // 건물 A 창문들
-        ctx.fillStyle = "rgba(255, 220, 100, 0.15)"; // 희미한 불빛
-        if (i % 2 === 0) {
-          ctx.fillRect(bx + 10, by + 20, 6, 8);
-          ctx.fillRect(bx + 28, by + 50, 6, 8);
-        }
-        ctx.fillStyle = COLORS.buildingA; // 빌딩 색상 원복
+      // 원경 나무들 (매우 어두운)
+      const parallax1 = camera.y * 0.25;
+      drawTreeGroup(-200, viewH - 150 + (parallax1 % 300), 
+                    ["#0a1a10", "#081410", "#06120c"], 0.3, 50, 12);
+      drawTreeGroup(100, viewH - 140 + (parallax1 % 300),
+                    ["#0a1a10", "#081410", "#06120c"], 0.3, 45, 10);
+      drawTreeGroup(350, viewH - 160 + (parallax1 % 300),
+                    ["#0a1a10", "#081410", "#06120c"], 0.3, 55, 14);
+
+      // 중경 나무들
+      const parallax2 = camera.y * 0.4;
+      drawTreeGroup(-150, viewH - 100 + (parallax2 % 300),
+                    ["#1a3a1a", "#0f2a0f", "#0a2008"], 0.5, 60, 16);
+      drawTreeGroup(80, viewH - 90 + (parallax2 % 300),
+                    ["#1a3a1a", "#0f2a0f", "#0a2008"], 0.5, 55, 14);
+      drawTreeGroup(320, viewH - 110 + (parallax2 % 300),
+                    ["#1a3a1a", "#0f2a0f", "#0a2008"], 0.5, 65, 18);
+
+      // 근경 나무들 (더 선명한 색상)
+      const parallax3 = camera.y * 0.55;
+      drawTreeGroup(-100, viewH - 30 + (parallax3 % 300),
+                    ["#2a4a2a", "#1a3a1a", "#0f2f0f"], 0.7, 70, 20);
+      drawTreeGroup(150, viewH - 20 + (parallax3 % 300),
+                    ["#2a4a2a", "#1a3a1a", "#0f2f0f"], 0.7, 75, 22);
+      drawTreeGroup(400, viewH - 40 + (parallax3 % 300),
+                    ["#2a4a2a", "#1a3a1a", "#0f2f0f"], 0.7, 80, 24);
+
+      // 반딧불이 효과
+      ctx.fillStyle = "rgba(255, 240, 100, 0.6)";
+      for (let f = 0; f < 8; f++) {
+        let fx = (f * 61 + 40) % viewW;
+        let fy = (f * 107 + 100 + parallax2) % (viewH * 0.8);
+        ctx.fillRect(fx, fy, 1.5, 1.5);
       }
+    }
 
-      ctx.fillStyle = COLORS.buildingB;
-      for (let i = -2; i < 8; i++) {
-        const bw = 30;
-        const bx = 20 + (i * 90) - ((camera.x * 0.15 + 40) % 90);
-        const bh = 60 + ((i * 37) % 90);
-        const by = viewH - bh + (parallax % 260) - 130;
-        ctx.fillRect(bx, by, bw, bh + 400);
+    // 나무 그룹 그리기 함수
+    function drawTreeGroup(baseX, baseY, colors, alpha, trunkHeight, canopySize) {
+      ctx.globalAlpha = alpha;
 
-        // 건물 B 창문들
-        ctx.fillStyle = "rgba(255, 235, 150, 0.25)"; // 조금 더 선명한 불빛
-        if (i % 3 === 0) {
-          ctx.fillRect(bx + 8, by + 15, 5, 5);
-          ctx.fillRect(bx + 18, by + 35, 5, 5);
-        }
-        ctx.fillStyle = COLORS.buildingB;
-      }
+      // 트렁크
+      ctx.fillStyle = colors[2];
+      const trunkWidth = Math.max(4, Math.floor(canopySize * 0.25));
+      ctx.fillRect(baseX - trunkWidth / 2, baseY - trunkHeight, trunkWidth, trunkHeight);
+
+      // 잎사귀 (원형 여러 겹)
+      ctx.fillStyle = colors[0];
+      ctx.beginPath();
+      ctx.arc(baseX, baseY - trunkHeight - canopySize * 0.3, canopySize * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = colors[1];
+      ctx.beginPath();
+      ctx.arc(baseX - canopySize * 0.25, baseY - trunkHeight, canopySize * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(baseX + canopySize * 0.25, baseY - trunkHeight, canopySize * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = colors[0];
+      ctx.beginPath();
+      ctx.arc(baseX, baseY - trunkHeight + canopySize * 0.2, canopySize * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.globalAlpha = 1;
     }
 
     function drawStep(step) {
@@ -597,17 +625,14 @@ canvas#game {
       const x = p.x - w / 2;
       const y = p.y;
 
-      // 밤 분위기에 맞춰 그림자 밝기 조정
-      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillStyle = "rgba(0,0,0,0.35)";
       ctx.fillRect(x + 6, y + h, w - 12, Math.max(0, viewH - (y + h)));
 
-      // brick platform
       ctx.fillStyle = COLORS.brick;
       ctx.fillRect(x, y, w, h);
       ctx.fillStyle = COLORS.brickDark;
       ctx.fillRect(x, y + h - 5, w, 5);
 
-      // brick pattern lines
       ctx.strokeStyle = COLORS.brickLine;
       ctx.lineWidth = 1;
       const cell = 12;
@@ -632,33 +657,26 @@ canvas#game {
       ctx.translate(p.x + wobble, p.y - 30 + bob);
       ctx.scale(facing, 1);
 
-      // legs
       ctx.fillStyle = COLORS.pants;
       ctx.fillRect(-8, 14, 6, 12);
       ctx.fillRect(2, 14, 6, 12);
 
-      // torso
       ctx.fillStyle = COLORS.shirt;
       ctx.fillRect(-9, -4, 18, 20);
 
-      // tie
       ctx.fillStyle = COLORS.tie;
       ctx.fillRect(-2, -3, 4, 12);
 
-      // arms
       ctx.fillStyle = COLORS.shirt;
       ctx.fillRect(-13, -2, 5, 12);
       ctx.fillRect(8, -2, 5, 12);
 
-      // head
       ctx.fillStyle = COLORS.skin;
       ctx.fillRect(-8, -20, 16, 16);
 
-      // hair
       ctx.fillStyle = COLORS.hair;
       ctx.fillRect(-8, -22, 16, 5);
 
-      // eye
       ctx.fillStyle = "#1a1a1a";
       ctx.fillRect(4, -13, 2, 2);
 
