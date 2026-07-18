@@ -447,9 +447,9 @@ canvas#game {
         // 현재 방향을 무작위로 선택 (L 또는 R)
         curDir = Math.random() < 0.5 ? "L" : "R";
         
-        // 층이 높아질수록 더 긴 런을 가능하게 (더 다양한 패턴)
-        const minRun = 2;
-        const maxRun = Math.min(8, 3 + Math.floor(floor / 50));
+        // 매우 짧은 구간 (1-4칸) - 자주 꺾임
+        const minRun = 1;
+        const maxRun = Math.min(4, 2 + Math.floor(floor / 100));
         runRemaining = minRun + Math.floor(Math.random() * (maxRun - minRun + 1));
       }
       
