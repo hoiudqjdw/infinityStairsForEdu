@@ -339,6 +339,12 @@ canvas#game {
   border-color: #6a1b9a;
 }
 
+#btnSelectInvis {
+  background: #3f51b5;
+  color: #fff;
+  border-color: #303f9f;
+}
+
 .btnBack {
   margin-top: 10px;
   padding: 8px 20px;
@@ -452,6 +458,9 @@ canvas#game {
         <button id="btnSelectLaser" class="extraModeBtn">
           <span>⚡</span> 레이저 모드
         </button>
+        <button id="btnSelectInvis" class="extraModeBtn">
+          <span>👻</span> 투명도 모드
+        </button>
       </div>
       <button id="btnBackToMain" class="btnBack">뒤로 가기</button>
     </div>
@@ -491,6 +500,7 @@ canvas#game {
     const stage = document.getElementById("stage");
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
+    const gaugeWrap = document.getElementById("gaugeWrap");
 
     let dpr = Math.max(1, window.devicePixelRatio || 1);
     let viewW = 0, viewH = 0;
@@ -540,8 +550,9 @@ canvas#game {
     let camera = { x: 0, y: 0 };
     let shake = 0;
 
-    // ---------- Laser Mode Data ----------
-    let lasers = []; // { floorIndex, timer, state: 'warning'|'active'|'done' }
+    // ---------- Laser & Invis Mode Data ----------
+    let lasers = [];
+    let stairOpacity = 1.0;
 
     // ---------- Audio ----------
     const bgm = new Audio("audio/bgm.mp3");
@@ -617,16 +628,24 @@ canvas#game {
       floor = 0;
       elapsedPlaying = 0;
       lasers = [];
+      stairOpacity = 1.0;
 
       camera.x = charPos.x;
       camera.y = charPos.y;
       shake = 0;
 
+      // 투명도 모드에서는 타임바(게이지) 완전 숨김
+      if (gameMode === "invis") {
+        gaugeWrap.style.display = "none";
+      } else {
+        gaugeWrap.style.display = "block";
+      }
+
       updateFloorLabel();
       updateGauge();
     }
 
-    // ---------- Input ----------
+    // ---------- Input & Game Logic ----------
     function tryStep(pressedDir) {
       if (state !== "playing") return;
       if (isAnimating) return;
@@ -639,10 +658,23 @@ canvas#game {
         animKind = "move";
         isAnimating = true;
 
+        // 꺾이는 구간 확인 (직전 계단 방향과 다음 계단 방향 비교)
+        const prevDir = steps[currentIndex].dir;
+        const nextDir = target.dir;
+        const isTurn = (prevDir !== null && prevDir !== nextDir);
+
         currentIndex++;
         floor++;
         
-        if (gameMode !== "thief") {
+        // 투명도 모드 꺾임 처리:
+        // 꺾일 때마다 불투명해짐(시야 회복). 단, 층이 높을수록 회복량이 적어짐.
+        if (gameMode === "invis" && isTurn) {
+          // 0층에서 80% 회복, 층이 높아질수록 회복량이 줄어들어 최소 15%만 회복됨
+          const recovery = Math.max(0.15, 0.8 - floor * 0.005);
+          stairOpacity = Math.min(1.0, stairOpacity + recovery);
+        }
+
+        if (gameMode !== "thief" && gameMode !== "invis") {
           timeLeft = Math.min(TIME_MAX, timeLeft + TIME_BONUS);
         }
         
@@ -707,13 +739,13 @@ canvas#game {
     const extraModesPopup = document.getElementById("extraModesPopup");
     const btnSelectThief = document.getElementById("btnSelectThief");
     const btnSelectLaser = document.getElementById("btnSelectLaser");
+    const btnSelectInvis = document.getElementById("btnSelectInvis");
     const btnBackToMain = document.getElementById("btnBackToMain");
     const btnBackFromThief = document.getElementById("btnBackFromThief");
 
     btnDay.addEventListener("click", () => { playSfx("click"); selectMode("day"); });
     btnNight.addEventListener("click", () => { playSfx("click"); selectMode("night"); });
-    
-    // '모드' 버튼 클릭 -> 팝업 출력
+
     btnCustomModes.addEventListener("click", () => {
       playSfx("click");
       extraModesPopup.classList.remove("hidden");
@@ -735,6 +767,12 @@ canvas#game {
       playSfx("click");
       extraModesPopup.classList.add("hidden");
       selectMode("laser");
+    });
+
+    btnSelectInvis.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      selectMode("invis");
     });
 
     btnBackFromThief.addEventListener("click", () => {
@@ -816,6 +854,7 @@ canvas#game {
     const floorNumEl = document.getElementById("floorNum");
 
     function updateGauge() {
+      if (gameMode === "invis") return;
       const pct = (timeLeft / TIME_MAX) * 100;
       gaugeFillEl.style.width = pct + "%";
       gaugeFillEl.style.background = pct <= 25
@@ -836,8 +875,6 @@ canvas#game {
     // ---------- Laser Mode Logic ----------
     function updateLasers(dt) {
       const spawnAhead = 15;
-      // 버그 수정 1: floor + 2 가 아닌 floor + 1 부터 검사하여 
-      // 바로 앞 칸의 레이저가 소멸 후 바로 재생성될 수 있도록 함.
       for (let i = floor + 1; i <= floor + spawnAhead; i++) {
         if (i % 4 === 0 && !lasers.some(l => l.floorIndex === i)) {
           lasers.push({ floorIndex: i, timer: 0, state: 'warning' });
@@ -854,9 +891,7 @@ canvas#game {
         }
       }
 
-      // 소멸된 레이저 정리
       lasers = lasers.filter(l => l.state !== 'done');
-
       checkLaserCollision();
     }
 
@@ -871,7 +906,7 @@ canvas#game {
       }
     }
 
-    // ---------- Update ----------
+    // ---------- Frame Updates ----------
     function update(dt) {
       if (state !== "playing") return;
 
@@ -884,6 +919,9 @@ canvas#game {
           return;
         }
         thiefPos = steps[thiefFloor] ? { x: steps[thiefFloor].x, y: steps[thiefFloor].y } : { x: 0, y: 0 };
+      } else if (gameMode === "invis") {
+        // 투명도 모드: 0.01초당 2% 투명도 추가 = 초당 200% 불투명도(opacity) 감소
+        stairOpacity = Math.max(0, stairOpacity - 2.0 * dt);
       } else {
         const additionalDrain = Math.min(50, floor / 8);
         const rate = BASE_DRAIN_RATE + additionalDrain;
@@ -1055,8 +1093,20 @@ canvas#game {
       const x = p.x - w / 2;
       const y = p.y;
 
-      ctx.fillStyle = "rgba(0,0,0,0.35)";
-      ctx.fillRect(x + 6, y + h, w - 12, Math.max(0, viewH - (y + h)));
+      ctx.save();
+      // 투명도 모드일 경우 globalAlpha 적용
+      if (gameMode === "invis") {
+        ctx.globalAlpha = stairOpacity;
+      }
+
+      // 투명도 모드에서는 뒤쪽 배경(하늘/나무)이 비쳐 보일 수 있도록 검은 기둥 대신 얇은 그림자만 렌더링
+      if (gameMode === "invis") {
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
+        ctx.fillRect(x + 4, y + h, w - 8, 8);
+      } else {
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        ctx.fillRect(x + 6, y + h, w - 12, Math.max(0, viewH - (y + h)));
+      }
 
       ctx.fillStyle = colors.brick;
       ctx.fillRect(x, y, w, h);
@@ -1081,7 +1131,6 @@ canvas#game {
         const laser = lasers.find(l => l.floorIndex === idx);
         if (laser) {
           if (laser.state === 'warning') {
-            // 깜빡이는 경고 오버레이
             const alpha = Math.sin(laser.timer * 15) * 0.3 + 0.5;
             ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
             ctx.fillRect(x, y - 5, w, h + 5);
@@ -1089,24 +1138,19 @@ canvas#game {
             ctx.font = "bold 12px sans-serif";
             ctx.fillText("⚠️", x + w/2 - 6, y - 8);
           } else if (laser.state === 'active') {
-            // 슬림하고 날카로운 수직 레이저 빔
             const laserTop = -300;
             const laserHeight = y + h / 2 - laserTop;
             const cx = x + w / 2;
 
-            // 1. 은은한 외곽 붉은 빛 글로우
             ctx.fillStyle = "rgba(255, 0, 80, 0.35)";
             ctx.fillRect(cx - 6, laserTop, 12, laserHeight);
 
-            // 2. 메인 붉은 레이저 빔 (6px)
             ctx.fillStyle = "#ff0055";
             ctx.fillRect(cx - 3, laserTop, 6, laserHeight);
 
-            // 3. 중심부 선명한 흰색 코어 (2px)
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(cx - 1, laserTop, 2, laserHeight);
 
-            // 4. 바닥 충돌 이펙트 (컴팩트한 슬림 파동)
             ctx.fillStyle = "rgba(255, 0, 80, 0.85)";
             ctx.beginPath();
             ctx.ellipse(cx, y + h / 2 - 2, 10, 4, 0, 0, Math.PI * 2);
@@ -1119,6 +1163,8 @@ canvas#game {
           }
         }
       }
+
+      ctx.restore();
     }
 
     function drawCharacter() {
