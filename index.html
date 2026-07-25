@@ -835,9 +835,10 @@ canvas#game {
 
     // ---------- Laser Mode Logic ----------
     function updateLasers(dt) {
-      // 3~6층 간격으로 레이저 생성
       const spawnAhead = 15;
-      for (let i = floor + 2; i <= floor + spawnAhead; i++) {
+      // 버그 수정 1: floor + 2 가 아닌 floor + 1 부터 검사하여 
+      // 바로 앞 칸의 레이저가 소멸 후 바로 재생성될 수 있도록 함.
+      for (let i = floor + 1; i <= floor + spawnAhead; i++) {
         if (i % 4 === 0 && !lasers.some(l => l.floorIndex === i)) {
           lasers.push({ floorIndex: i, timer: 0, state: 'warning' });
         }
@@ -1088,11 +1089,33 @@ canvas#game {
             ctx.font = "bold 12px sans-serif";
             ctx.fillText("⚠️", x + w/2 - 6, y - 8);
           } else if (laser.state === 'active') {
-            // 치명적인 레이저 빔
-            ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
-            ctx.fillRect(x - 100, y - 8, w + 200, 12);
+            // 슬림하고 날카로운 수직 레이저 빔
+            const laserTop = -300;
+            const laserHeight = y + h / 2 - laserTop;
+            const cx = x + w / 2;
+
+            // 1. 은은한 외곽 붉은 빛 글로우
+            ctx.fillStyle = "rgba(255, 0, 80, 0.35)";
+            ctx.fillRect(cx - 6, laserTop, 12, laserHeight);
+
+            // 2. 메인 붉은 레이저 빔 (6px)
+            ctx.fillStyle = "#ff0055";
+            ctx.fillRect(cx - 3, laserTop, 6, laserHeight);
+
+            // 3. 중심부 선명한 흰색 코어 (2px)
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(x - 100, y - 4, w + 200, 4);
+            ctx.fillRect(cx - 1, laserTop, 2, laserHeight);
+
+            // 4. 바닥 충돌 이펙트 (컴팩트한 슬림 파동)
+            ctx.fillStyle = "rgba(255, 0, 80, 0.85)";
+            ctx.beginPath();
+            ctx.ellipse(cx, y + h / 2 - 2, 10, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.ellipse(cx, y + h / 2 - 2, 4, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
       }
