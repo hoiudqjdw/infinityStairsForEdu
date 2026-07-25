@@ -1075,31 +1075,24 @@ canvas#game {
       ctx.lineWidth = 2;
       ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
 
-      // 세로 레이저 연출
+      // 레이저 연출
       if (gameMode === "laser") {
         const laser = lasers.find(l => l.floorIndex === idx);
         if (laser) {
-          const laserWidth = 24;
-          const laserX = p.x - laserWidth / 2;
-          
           if (laser.state === 'warning') {
-            // 깜빡이는 세로 경고 영역 (계단 위쪽으로 수직 기둥)
-            const alpha = Math.sin(laser.timer * 15) * 0.3 + 0.4;
+            // 깜빡이는 경고 오버레이
+            const alpha = Math.sin(laser.timer * 15) * 0.3 + 0.5;
             ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
-            ctx.fillRect(laserX, 0, laserWidth, y);
-            
-            // 경고 아이콘
+            ctx.fillRect(x, y - 5, w, h + 5);
             ctx.fillStyle = "#ffeb3b";
-            ctx.font = "bold 14px sans-serif";
-            ctx.fillText("⚠️", p.x - 7, y - 25);
+            ctx.font = "bold 12px sans-serif";
+            ctx.fillText("⚠️", x + w/2 - 6, y - 8);
           } else if (laser.state === 'active') {
-            // 수직 레이저 빔 (화면 상단부터 계단 바닥까지)
-            ctx.fillStyle = "rgba(255, 0, 0, 0.85)";
-            ctx.fillRect(laserX, 0, laserWidth, y + h);
-            
-            // 중앙의 밝은 수직 광선
+            // 치명적인 레이저 빔
+            ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
+            ctx.fillRect(x - 100, y - 8, w + 200, 12);
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(p.x - 4, 0, 8, y + h);
+            ctx.fillRect(x - 100, y - 4, w + 200, 4);
           }
         }
       }
