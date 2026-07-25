@@ -240,15 +240,9 @@ canvas#game {
   text-shadow: 2px 2px 0 #7a4a10;
 }
 
-#modeSelection p {
-  margin: 0 0 30px;
-  font-size: 16px;
-  opacity: 0.8;
-}
-
 #modeButtons {
   display: flex;
-  gap: 20px;
+  gap: 15px;
   justify-content: center;
   width: 100%;
   flex-wrap: wrap;
@@ -256,9 +250,10 @@ canvas#game {
 
 .modeBtn {
   flex: 1;
-  max-width: 150px;
-  padding: 40px 20px;
-  font-size: 24px;
+  min-width: 100px;
+  max-width: 130px;
+  padding: 25px 10px;
+  font-size: 20px;
   font-weight: bold;
   border: 4px solid #b8871f;
   border-radius: 12px;
@@ -275,51 +270,27 @@ canvas#game {
   color: #4a3210;
 }
 
-#btnDay:hover {
-  background: #ffe566;
-}
-
-#btnDay:active {
-  transform: translateY(2px);
-}
-
 #btnNight {
   background: #3a3f58;
   color: #fff8e8;
   border-color: #505570;
 }
 
-#btnNight:hover {
-  background: #45495f;
-}
-
-#btnNight:active {
-  transform: translateY(2px);
-}
-
-#btnThief {
+#btnCustomModes {
   background: #d84a3a;
   color: #fff8e8;
   border-color: #a83a2a;
 }
 
-#btnThief:hover {
-  background: #e85a4a;
-}
-
-#btnThief:active {
-  transform: translateY(2px);
-}
-
 .modeBtn span {
-  font-size: 40px;
+  font-size: 32px;
 }
 
-/* ---------- Difficulty Selection ---------- */
-#difficultySelection {
+/* ---------- Extra Modes Popup ---------- */
+#extraModesPopup {
   position: absolute;
   inset: 0;
-  z-index: 10;
+  z-index: 11;
   background: rgba(6, 7, 12, 0.95);
   display: flex;
   flex-direction: column;
@@ -328,29 +299,80 @@ canvas#game {
   text-align: center;
   color: #fff8e8;
   padding: 24px;
-  gap: 30px;
+  gap: 20px;
+}
+
+#extraModesPopup.hidden {
+  display: none;
+}
+
+#extraModesList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 260px;
+}
+
+.extraModeBtn {
+  padding: 18px;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 12px;
+  border: 3px solid;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+#btnSelectThief {
+  background: #d84a3a;
+  color: #fff;
+  border-color: #a83a2a;
+}
+
+#btnSelectLaser {
+  background: #9c27b0;
+  color: #fff;
+  border-color: #6a1b9a;
+}
+
+.btnBack {
+  margin-top: 10px;
+  padding: 8px 20px;
+  font-size: 14px;
+  background: #444;
+  color: #ccc;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ---------- Difficulty Selection ---------- */
+#difficultySelection {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  background: rgba(6, 7, 12, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff8e8;
+  padding: 24px;
+  gap: 20px;
 }
 
 #difficultySelection.hidden {
   display: none;
 }
 
-#difficultySelection h1 {
-  font-size: 32px;
-  margin: 0;
-  color: #ffd25a;
-  text-shadow: 2px 2px 0 #7a4a10;
-}
-
 #difficultySliderContainer {
   width: 100%;
   max-width: 300px;
-}
-
-#difficultyLabel {
-  font-size: 20px;
-  margin-bottom: 15px;
-  color: #ffd25a;
 }
 
 #difficultySlider {
@@ -375,47 +397,11 @@ canvas#game {
   border: 3px solid #b8871f;
 }
 
-#difficultySlider::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #ffd25a;
-  cursor: pointer;
-  border: 3px solid #b8871f;
-}
-
 #difficultyValue {
   font-size: 28px;
   font-weight: bold;
   color: #ffd25a;
-  margin-top: 15px;
-}
-
-#difficultyDescription {
-  font-size: 14px;
-  opacity: 0.8;
   margin-top: 10px;
-}
-
-#btnStartThief {
-  padding: 14px 36px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #4a3210;
-  background: #ffd25a;
-  border: 4px solid #b8871f;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.1s;
-  margin-top: 20px;
-}
-
-#btnStartThief:hover {
-  background: #ffe566;
-}
-
-#btnStartThief:active {
-  transform: translateY(2px);
 }
 </style>
 </head>
@@ -436,6 +422,7 @@ canvas#game {
       <button id="btnRight" class="ctrlBtn" aria-label="오른쪽">▶</button>
     </div>
 
+    <!-- 메인 모드 선택 -->
     <div id="modeSelection" class="overlay">
       <h1>무한의 계단</h1>
       <p>모드를 선택하세요</p>
@@ -448,22 +435,38 @@ canvas#game {
           <span>🌙</span>
           <div>밤</div>
         </button>
-        <button id="btnThief" class="modeBtn">
-          <span>🔴</span>
-          <div>도둑잡기</div>
+        <button id="btnCustomModes" class="modeBtn">
+          <span>🎮</span>
+          <div>모드</div>
         </button>
       </div>
     </div>
 
+    <!-- 모드 선택 팝업창 -->
+    <div id="extraModesPopup" class="overlay hidden">
+      <h1>특수 모드</h1>
+      <div id="extraModesList">
+        <button id="btnSelectThief" class="extraModeBtn">
+          <span>🔴</span> 도둑잡기
+        </button>
+        <button id="btnSelectLaser" class="extraModeBtn">
+          <span>⚡</span> 레이저 모드
+        </button>
+      </div>
+      <button id="btnBackToMain" class="btnBack">뒤로 가기</button>
+    </div>
+
+    <!-- 도둑잡기 난이도 선택 -->
     <div id="difficultySelection" class="overlay hidden">
       <h1>도둑잡기</h1>
       <div id="difficultySliderContainer">
-        <div id="difficultyLabel">난이도 선택</div>
+        <div>난이도 선택</div>
         <input type="range" id="difficultySlider" min="1" max="10" value="5">
         <div id="difficultyValue">5</div>
-        <div id="difficultyDescription">난이도가 높을수록 도둑이 빠릅니다</div>
+        <p class="small">난이도가 높을수록 도둑이 빠릅니다</p>
       </div>
       <button id="btnStartThief" class="bigBtn">시작하기</button>
+      <button id="btnBackFromThief" class="btnBack">뒤로 가기</button>
     </div>
 
     <div id="startScreen" class="overlay hidden">
@@ -537,7 +540,8 @@ canvas#game {
     let camera = { x: 0, y: 0 };
     let shake = 0;
 
-    const keys = {};
+    // ---------- Laser Mode Data ----------
+    let lasers = []; // { floorIndex, timer, state: 'warning'|'active'|'done' }
 
     // ---------- Audio ----------
     const bgm = new Audio("audio/bgm.mp3");
@@ -612,6 +616,7 @@ canvas#game {
       timeLeft = TIME_MAX;
       floor = 0;
       elapsedPlaying = 0;
+      lasers = [];
 
       camera.x = charPos.x;
       camera.y = charPos.y;
@@ -645,7 +650,12 @@ canvas#game {
         updateFloorLabel();
         playSfx("step");
         
-        // 도둑잡기 모드: 도둑에게 도달했는지 확인
+        // 레이저 충돌 확인
+        if (gameMode === "laser") {
+          checkLaserCollision();
+        }
+
+        // 도둑잡기 모드
         if (gameMode === "thief" && floor >= thiefFloor) {
           triggerGameWin();
         }
@@ -690,13 +700,48 @@ canvas#game {
     document.getElementById("btnStart").addEventListener("click", () => { playSfx("click"); startGame(); });
     document.getElementById("btnRetry").addEventListener("click", () => { playSfx("click"); backToModeSelect(); });
 
+    // UI 모드 선택
     const btnDay = document.getElementById("btnDay");
     const btnNight = document.getElementById("btnNight");
-    const btnThief = document.getElementById("btnThief");
+    const btnCustomModes = document.getElementById("btnCustomModes");
+    const extraModesPopup = document.getElementById("extraModesPopup");
+    const btnSelectThief = document.getElementById("btnSelectThief");
+    const btnSelectLaser = document.getElementById("btnSelectLaser");
+    const btnBackToMain = document.getElementById("btnBackToMain");
+    const btnBackFromThief = document.getElementById("btnBackFromThief");
 
     btnDay.addEventListener("click", () => { playSfx("click"); selectMode("day"); });
     btnNight.addEventListener("click", () => { playSfx("click"); selectMode("night"); });
-    btnThief.addEventListener("click", () => { playSfx("click"); selectMode("thief"); });
+    
+    // '모드' 버튼 클릭 -> 팝업 출력
+    btnCustomModes.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.remove("hidden");
+    });
+
+    btnBackToMain.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+    });
+
+    btnSelectThief.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      document.getElementById("modeSelection").classList.add("hidden");
+      document.getElementById("difficultySelection").classList.remove("hidden");
+    });
+
+    btnSelectLaser.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      selectMode("laser");
+    });
+
+    btnBackFromThief.addEventListener("click", () => {
+      playSfx("click");
+      document.getElementById("difficultySelection").classList.add("hidden");
+      document.getElementById("modeSelection").classList.remove("hidden");
+    });
 
     const difficultySlider = document.getElementById("difficultySlider");
     const difficultyValue = document.getElementById("difficultyValue");
@@ -708,22 +753,13 @@ canvas#game {
 
     document.getElementById("btnStartThief").addEventListener("click", () => {
       playSfx("click");
-      state = "playing";
       gameMode = "thief";
+      state = "start";
       document.getElementById("difficultySelection").classList.add("hidden");
-      resetGame();
-      bgm.currentTime = 0;
-      if (!muted) bgm.play().catch(() => {});
+      document.getElementById("startScreen").classList.remove("hidden");
     });
 
     function selectMode(mode) {
-      if (mode === "thief") {
-        state = "difficultySelect";
-        document.getElementById("modeSelection").classList.add("hidden");
-        document.getElementById("difficultySelection").classList.remove("hidden");
-        return;
-      }
-      
       gameMode = mode;
       state = "start";
       document.getElementById("modeSelection").classList.add("hidden");
@@ -736,6 +772,7 @@ canvas#game {
       document.getElementById("startScreen").classList.add("hidden");
       document.getElementById("gameOverScreen").classList.add("hidden");
       document.getElementById("difficultySelection").classList.add("hidden");
+      document.getElementById("extraModesPopup").classList.add("hidden");
       document.getElementById("modeSelection").classList.remove("hidden");
     }
 
@@ -752,8 +789,13 @@ canvas#game {
       if (state !== "playing") return;
       state = "gameover";
       document.getElementById("finalFloor").textContent = floor;
-      document.getElementById("gameOverTitle").textContent =
-        reason === "miss" ? "헛디뎠다!" : (reason === "time" ? "시간 초과!" : "도둑에게 붙잡혔습니다!");
+      let title = "게임 오버";
+      if (reason === "miss") title = "헛디뎠다!";
+      else if (reason === "time") title = "시간 초과!";
+      else if (reason === "thief") title = "도둑을 놓쳤습니다!";
+      else if (reason === "laser") title = "레이저에 감전되었습니다!";
+      
+      document.getElementById("gameOverTitle").textContent = title;
       document.getElementById("gameOverScreen").classList.remove("hidden");
       bgm.pause();
       playSfx("gameover");
@@ -791,6 +833,43 @@ canvas#game {
       }
     }
 
+    // ---------- Laser Mode Logic ----------
+    function updateLasers(dt) {
+      // 3~6층 간격으로 레이저 생성
+      const spawnAhead = 15;
+      for (let i = floor + 2; i <= floor + spawnAhead; i++) {
+        if (i % 4 === 0 && !lasers.some(l => l.floorIndex === i)) {
+          lasers.push({ floorIndex: i, timer: 0, state: 'warning' });
+        }
+      }
+
+      for (let l of lasers) {
+        l.timer += dt;
+        if (l.state === 'warning' && l.timer >= 1.5) {
+          l.state = 'active';
+          l.timer = 0;
+        } else if (l.state === 'active' && l.timer >= 0.5) {
+          l.state = 'done';
+        }
+      }
+
+      // 소멸된 레이저 정리
+      lasers = lasers.filter(l => l.state !== 'done');
+
+      checkLaserCollision();
+    }
+
+    function checkLaserCollision() {
+      for (let l of lasers) {
+        if (l.state === 'active' && l.floorIndex === floor) {
+          shake = 2;
+          playSfx("miss");
+          triggerGameOver("laser");
+          break;
+        }
+      }
+    }
+
     // ---------- Update ----------
     function update(dt) {
       if (state !== "playing") return;
@@ -798,18 +877,13 @@ canvas#game {
       elapsedPlaying += dt;
       
       if (gameMode === "thief") {
-        // 도둑잡기 모드
         thiefFloor = Math.floor(10 + (thiefDifficulty * elapsedPlaying * 0.5));
-        
-        // 도둑이 150층 도달 시 실패
         if (thiefFloor >= 150) {
           triggerGameOver("thief");
           return;
         }
-
         thiefPos = steps[thiefFloor] ? { x: steps[thiefFloor].x, y: steps[thiefFloor].y } : { x: 0, y: 0 };
       } else {
-        // 일반 모드
         const additionalDrain = Math.min(50, floor / 8);
         const rate = BASE_DRAIN_RATE + additionalDrain;
         
@@ -820,6 +894,10 @@ canvas#game {
           triggerGameOver("time");
           return;
         }
+      }
+
+      if (gameMode === "laser") {
+        updateLasers(dt);
       }
 
       if (isAnimating) {
@@ -876,8 +954,7 @@ canvas#game {
     };
 
     function getColors() {
-      if (gameMode === "thief") return COLORS_DAY;
-      return gameMode === "day" ? COLORS_DAY : COLORS_NIGHT;
+      return (gameMode === "night") ? COLORS_NIGHT : COLORS_DAY;
     }
 
     function worldToScreen(wx, wy) {
@@ -895,7 +972,7 @@ canvas#game {
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, viewW, viewH);
 
-      if (gameMode !== "thief" && gameMode === "night") {
+      if (gameMode === "night") {
         ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
         for (let s = 0; s < 20; s++) {
           let sx = (s * 53 + 10) % viewW;
@@ -939,15 +1016,6 @@ canvas#game {
       drawTreeGroup(-100, viewH - 30 + (parallax3 % 300), treeColors3, 0.7, 70, 20);
       drawTreeGroup(150, viewH - 20 + (parallax3 % 300), treeColors3, 0.7, 75, 22);
       drawTreeGroup(400, viewH - 40 + (parallax3 % 300), treeColors3, 0.7, 80, 24);
-
-      if (gameMode !== "thief" && gameMode === "night") {
-        ctx.fillStyle = "rgba(255, 240, 100, 0.6)";
-        for (let f = 0; f < 8; f++) {
-          let fx = (f * 61 + 40) % viewW;
-          let fy = (f * 107 + 100 + parallax2) % (viewH * 0.8);
-          ctx.fillRect(fx, fy, 1.5, 1.5);
-        }
-      }
     }
 
     function drawTreeGroup(baseX, baseY, colors, alpha, trunkHeight, canopySize) {
@@ -978,7 +1046,7 @@ canvas#game {
       ctx.globalAlpha = 1;
     }
 
-    function drawStep(step) {
+    function drawStep(step, idx) {
       const colors = getColors();
       const p = worldToScreen(step.x, step.y);
       const w = STEP_DX + 24;
@@ -1006,6 +1074,28 @@ canvas#game {
       ctx.strokeStyle = colors.stepEdge;
       ctx.lineWidth = 2;
       ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+
+      // 레이저 연출
+      if (gameMode === "laser") {
+        const laser = lasers.find(l => l.floorIndex === idx);
+        if (laser) {
+          if (laser.state === 'warning') {
+            // 깜빡이는 경고 오버레이
+            const alpha = Math.sin(laser.timer * 15) * 0.3 + 0.5;
+            ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
+            ctx.fillRect(x, y - 5, w, h + 5);
+            ctx.fillStyle = "#ffeb3b";
+            ctx.font = "bold 12px sans-serif";
+            ctx.fillText("⚠️", x + w/2 - 6, y - 8);
+          } else if (laser.state === 'active') {
+            // 치명적인 레이저 빔
+            ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
+            ctx.fillRect(x - 100, y - 8, w + 200, 12);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(x - 100, y - 4, w + 200, 4);
+          }
+        }
+      }
     }
 
     function drawCharacter() {
@@ -1051,7 +1141,6 @@ canvas#game {
       ctx.save();
       ctx.translate(p.x, p.y - 30);
 
-      // 빨간 도둑 캐릭터
       ctx.fillStyle = "#1a1a1a";
       ctx.fillRect(-8, 14, 6, 12);
       ctx.fillRect(2, 14, 6, 12);
@@ -1091,7 +1180,7 @@ canvas#game {
 
       const lo = Math.max(0, currentIndex - 2);
       const hi = Math.min(steps.length - 1, currentIndex + 14);
-      for (let i = lo; i <= hi; i++) drawStep(steps[i]);
+      for (let i = lo; i <= hi; i++) drawStep(steps[i], i);
 
       if (gameMode === "thief" && thiefFloor >= 10 && thiefFloor < 150) {
         drawThief();
