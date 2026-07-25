@@ -920,8 +920,8 @@ canvas#game {
         }
         thiefPos = steps[thiefFloor] ? { x: steps[thiefFloor].x, y: steps[thiefFloor].y } : { x: 0, y: 0 };
       } else if (gameMode === "invis") {
-        // 투명도 모드: 0.01초당 2% 투명도 추가 = 초당 200% 불투명도(opacity) 감소
-        stairOpacity = Math.max(0, stairOpacity - 2.0 * dt);
+        // 투명도 모드: 0.01초당 1% 투명도 추가 = 초당 100% 불투명도(opacity) 감소
+        stairOpacity = Math.max(0, stairOpacity - 1.0 * dt);
       } else {
         const additionalDrain = Math.min(50, floor / 8);
         const rate = BASE_DRAIN_RATE + additionalDrain;
