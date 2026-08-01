@@ -467,6 +467,9 @@ canvas#game {
         <button id="btnSelectTeleport" class="extraModeBtn" style="background: #009688; color: #fff; border-color: #004d40;">
           <span>🌀</span> 텔레포트
         </button>
+        <button id="btnSelectHardBlock" class="extraModeBtn" style="background: #b71c1c; color: #fff; border-color: #7f0000;">
+          <span>🧱</span> 하드블록
+        </button>
       </div>
       <button id="btnBackToMain" class="btnBack">뒤로 가기</button>
     </div>
@@ -562,6 +565,8 @@ canvas#game {
     let controlsReversed = false;
     let reverseTiles = [];
     let teleportTiles = [];
+    let hardBlockTiles = [];
+    let hardBlockTimer = 0;
 
     // ---------- Audio ----------
     const bgm = new Audio("audio/bgm.mp3");
@@ -641,6 +646,8 @@ canvas#game {
       controlsReversed = false;
       reverseTiles = [];
       teleportTiles = [];
+      hardBlockTiles = [];
+      hardBlockTimer = 0;
       
       for (let i = 20; i < 500; i++) {
         if (Math.random() < 0.2) {
@@ -648,6 +655,12 @@ canvas#game {
         }
         if (Math.random() < 0.12) {
           teleportTiles.push(i);
+        }
+      }
+
+      for (let i = 4; i < 500; i++) {
+        if (Math.random() < 0.22) {
+          hardBlockTiles.push(i);
         }
       }
 
@@ -686,6 +699,8 @@ canvas#game {
 
         currentIndex++;
         floor++;
+        hardBlockTimer = 0;
+
         if (gameMode === "reverse" && reverseTiles.includes(floor)) {
           controlsReversed = !controlsReversed;
         }
@@ -780,6 +795,7 @@ canvas#game {
     const btnSelectInvis = document.getElementById("btnSelectInvis");
     const btnSelectReverse = document.getElementById("btnSelectReverse");
     const btnSelectTeleport = document.getElementById("btnSelectTeleport");
+    const btnSelectHardBlock = document.getElementById("btnSelectHardBlock");
     
     const btnBackToMain = document.getElementById("btnBackToMain");
     const btnBackFromThief = document.getElementById("btnBackFromThief");
@@ -826,6 +842,12 @@ canvas#game {
       playSfx("click");
       extraModesPopup.classList.add("hidden");
       selectMode("teleport");
+    });
+
+    btnSelectHardBlock.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      selectMode("hardblock");
     });
 
     btnBackFromThief.addEventListener("click", () => {
@@ -885,6 +907,7 @@ canvas#game {
       else if (reason === "time") title = "시간 초과!";
       else if (reason === "thief") title = "도둑을 놓쳤습니다!";
       else if (reason === "laser") title = "레이저에 감전되었습니다!";
+      else if (reason === "hardblock") title = "붉은 계단이 폭발했습니다!";
       
       document.getElementById("gameOverTitle").textContent = title;
       document.getElementById("gameOverScreen").classList.remove("hidden");
@@ -990,6 +1013,20 @@ canvas#game {
 
       if (gameMode === "laser") {
         updateLasers(dt);
+      }
+
+      if (gameMode === "hardblock") {
+        if (hardBlockTiles.includes(floor) && !isAnimating) {
+          hardBlockTimer += dt;
+          if (hardBlockTimer >= 0.25) {
+            shake = 2;
+            playSfx("miss");
+            triggerGameOver("hardblock");
+            return;
+          }
+        } else {
+          hardBlockTimer = 0;
+        }
       }
 
       if (isAnimating) {
@@ -1161,12 +1198,24 @@ canvas#game {
         ctx.fillRect(x + 6, y + h, w - 12, Math.max(0, viewH - (y + h)));
       }
 
-      ctx.fillStyle = colors.brick;
+      let brickCol = colors.brick;
+      let brickDarkCol = colors.brickDark;
+      let brickLineCol = colors.brickLine;
+      let stepEdgeCol = colors.stepEdge;
+
+      if (gameMode === "hardblock" && hardBlockTiles.includes(idx)) {
+        brickCol = "#d32f2f";
+        brickDarkCol = "#8e0000";
+        brickLineCol = "#5f0000";
+        stepEdgeCol = "#ff5252";
+      }
+
+      ctx.fillStyle = brickCol;
       ctx.fillRect(x, y, w, h);
-      ctx.fillStyle = colors.brickDark;
+      ctx.fillStyle = brickDarkCol;
       ctx.fillRect(x, y + h - 5, w, 5);
 
-      ctx.strokeStyle = colors.brickLine;
+      ctx.strokeStyle = brickLineCol;
       ctx.lineWidth = 1;
       const cell = 12;
       for (let cx = 0; cx < w; cx += cell) {
@@ -1175,9 +1224,16 @@ canvas#game {
         ctx.lineTo(x + cx, y + h - 5);
         ctx.stroke();
       }
-      ctx.strokeStyle = colors.stepEdge;
+      ctx.strokeStyle = stepEdgeCol;
       ctx.lineWidth = 2;
       ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+
+      if (gameMode === "hardblock" && hardBlockTiles.includes(idx)) {
+        ctx.fillStyle = "#ffeb3b";
+        ctx.font = "bold 10px sans-serif";
+        ctx.fillText("🔥", x + w / 2 - 5, y - 5);
+      }
+
       if (
       gameMode === "reverse" &&
         reverseTiles.includes(idx)
