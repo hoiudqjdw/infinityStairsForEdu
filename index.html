@@ -473,6 +473,9 @@ canvas#game {
         <button id="btnSelectTimeAttack" class="extraModeBtn" style="background: #e65100; color: #fff; border-color: #bf360c;">
           <span>⏱️</span> 타임어택
         </button>
+        <button id="btnSelectNumberHard" class="extraModeBtn" style="background: #c62828; color: #fff; border-color: #8e0000;">
+          <span>🔢</span> 넘버하드
+        </button>
       </div>
       <button id="btnBackToMain" class="btnBack">뒤로 가기</button>
     </div>
@@ -570,6 +573,8 @@ canvas#game {
     let teleportTiles = [];
     let hardBlockTiles = [];
     let hardBlockTimer = 0;
+    let numberHardTiles = {};
+    let numberHardTimer = 0;
 
     // ---------- Audio ----------
     const bgm = new Audio("audio/bgm.mp3");
@@ -628,6 +633,65 @@ canvas#game {
       }
     }
 
+    // ---------- UI & Helper Functions ----------
+    const floorNumEl = document.getElementById("floorNum");
+    const gaugeFillEl = document.getElementById("gaugeFill");
+
+    function updateFloorLabel() {
+      if (floorNumEl) floorNumEl.textContent = floor;
+    }
+
+    function updateGauge() {
+      if (gaugeFillEl) {
+        const pct = (gameMode === "timeattack") ? (timeLeft / 10) * 100 : (timeLeft / TIME_MAX) * 100;
+        gaugeFillEl.style.width = Math.max(0, Math.min(100, pct)) + "%";
+      }
+    }
+
+    function triggerGameWin() {
+      if (state !== "playing") return;
+      state = "gameover";
+      document.getElementById("finalFloor").textContent = floor;
+      document.getElementById("gameOverTitle").textContent = "도둑 잡기 성공!";
+      document.getElementById("gameOverScreen").classList.remove("hidden");
+      bgm.pause();
+      playSfx("gameover");
+    }
+
+    function updateLasers(dt) {
+      let maxLaserFloor = lasers.length > 0 ? Math.max(...lasers.map(l => l.floorIndex)) : floor;
+      while (maxLaserFloor < floor + 20) {
+        maxLaserFloor += Math.floor(Math.random() * 4) + 4;
+        lasers.push({ floorIndex: maxLaserFloor, state: 'warning', timer: 0 });
+      }
+      for (let l of lasers) {
+        if (l.floorIndex >= floor - 2 && l.floorIndex <= floor + 10) {
+          l.timer += dt;
+          if (l.state === 'warning' && l.timer >= 1.0) {
+            l.state = 'active';
+            l.timer = 0;
+          } else if (l.state === 'active' && l.timer >= 1.2) {
+            l.state = 'off';
+            l.timer = 0;
+          } else if (l.state === 'off' && l.timer >= 1.5) {
+            l.state = 'warning';
+            l.timer = 0;
+          }
+        }
+      }
+      checkLaserCollision();
+    }
+
+    function checkLaserCollision() {
+      if (gameMode !== "laser") return;
+      const hit = lasers.find(l => l.floorIndex === floor && l.state === 'active');
+      if (hit) {
+        shake = 2;
+        playSfx("miss");
+        triggerGameOver("laser");
+      }
+    }
+
     function resetGame() {
       steps = [makeStartStep()];
       currentIndex = 0;
@@ -651,6 +715,8 @@ canvas#game {
       teleportTiles = [];
       hardBlockTiles = [];
       hardBlockTimer = 0;
+      numberHardTiles = {};
+      numberHardTimer = 0;
       
       for (let i = 20; i < 500; i++) {
         if (Math.random() < 0.2) {
@@ -664,6 +730,10 @@ canvas#game {
       for (let i = 4; i < 500; i++) {
         if (Math.random() < 0.22) {
           hardBlockTiles.push(i);
+        }
+        if (Math.random() < 0.2) {
+          const num = Math.floor(Math.random() * 9) + 2;
+          numberHardTiles[i] = { count: num, initial: num };
         }
       }
 
@@ -689,20 +759,29 @@ canvas#game {
 
       const target = steps[currentIndex + 1];
       if (target.dir === pressedDir) {
+        // 꺾이는 구간 확인 (직전 계단 방향과 다음 계단 방향 비교)
+        const prevDir = steps[currentIndex].dir;
+        const nextDir = target.dir;
+        const isTurn = (prevDir !== null && prevDir !== nextDir);
+
+        // 넘버하드 모드 연타 처리
+        if (gameMode === "numberhard" && numberHardTiles[floor] && numberHardTiles[floor].count > 1) {
+          numberHardTiles[floor].count--;
+          shake = 0.5;
+          playSfx("step");
+          return;
+        }
+
         animFrom = { x: charPos.x, y: charPos.y };
         animTo = { x: target.x, y: target.y };
         animStart = performance.now();
         animKind = "move";
         isAnimating = true;
 
-        // 꺾이는 구간 확인 (직전 계단 방향과 다음 계단 방향 비교)
-        const prevDir = steps[currentIndex].dir;
-        const nextDir = target.dir;
-        const isTurn = (prevDir !== null && prevDir !== nextDir);
-
         currentIndex++;
         floor++;
         hardBlockTimer = 0;
+        numberHardTimer = 0;
 
         if (gameMode === "reverse" && reverseTiles.includes(floor)) {
           controlsReversed = !controlsReversed;
@@ -800,6 +879,7 @@ canvas#game {
     const btnSelectTeleport = document.getElementById("btnSelectTeleport");
     const btnSelectHardBlock = document.getElementById("btnSelectHardBlock");
     const btnSelectTimeAttack = document.getElementById("btnSelectTimeAttack");
+    const btnSelectNumberHard = document.getElementById("btnSelectNumberHard");
     
     const btnBackToMain = document.getElementById("btnBackToMain");
     const btnBackFromThief = document.getElementById("btnBackFromThief");
@@ -860,6 +940,12 @@ canvas#game {
       selectMode("timeattack");
     });
 
+    btnSelectNumberHard.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      selectMode("numberhard");
+    });
+
     btnBackFromThief.addEventListener("click", () => {
       playSfx("click");
       document.getElementById("difficultySelection").classList.add("hidden");
@@ -918,6 +1004,7 @@ canvas#game {
       else if (reason === "thief") title = "도둑을 놓쳤습니다!";
       else if (reason === "laser") title = "레이저에 감전되었습니다!";
       else if (reason === "hardblock") title = "붉은 계단이 폭발했습니다!";
+      else if (reason === "numberhard") title = "숫자 계단이 폭발했습니다!";
       
       document.getElementById("gameOverTitle").textContent = title;
       document.getElementById("gameOverScreen").classList.remove("hidden");
@@ -925,75 +1012,6 @@ canvas#game {
       playSfx("gameover");
     }
 
-    function triggerGameWin() {
-      if (state !== "playing") return;
-      state = "gameover";
-      document.getElementById("finalFloor").textContent = floor;
-      document.getElementById("gameOverTitle").textContent = "도둑을 잡았습니다!";
-      document.getElementById("gameOverScreen").classList.remove("hidden");
-      bgm.pause();
-      playSfx("gameover");
-    }
-
-    // ---------- HUD ----------
-    const gaugeFillEl = document.getElementById("gaugeFill");
-    const floorNumEl = document.getElementById("floorNum");
-
-    function updateGauge() {
-      if (gameMode === "invis") return;
-      const maxTime = (gameMode === "timeattack") ? 10 : TIME_MAX;
-      const pct = (timeLeft / maxTime) * 100;
-      gaugeFillEl.style.width = pct + "%";
-      gaugeFillEl.style.background = pct <= 25
-        ? "linear-gradient(180deg, #ff6b5c, #c72a2a)"
-        : pct <= 55
-          ? "linear-gradient(180deg, #ffcf5c, #d68a1f)"
-          : "linear-gradient(180deg, #7ee88a, #2fa84a)";
-    }
-    
-    function updateFloorLabel() {
-      if (gameMode === "thief") {
-        floorNumEl.textContent = floor + " / " + thiefFloor;
-      } else {
-        floorNumEl.textContent = floor;
-      }
-    }
-
-    // ---------- Laser Mode Logic ----------
-    function updateLasers(dt) {
-      const spawnAhead = 15;
-      for (let i = floor + 1; i <= floor + spawnAhead; i++) {
-        if (i % 4 === 0 && !lasers.some(l => l.floorIndex === i)) {
-          lasers.push({ floorIndex: i, timer: 0, state: 'warning' });
-        }
-      }
-
-      for (let l of lasers) {
-        l.timer += dt;
-        if (l.state === 'warning' && l.timer >= 1.5) {
-          l.state = 'active';
-          l.timer = 0;
-        } else if (l.state === 'active' && l.timer >= 0.5) {
-          l.state = 'done';
-        }
-      }
-
-      lasers = lasers.filter(l => l.state !== 'done');
-      checkLaserCollision();
-    }
-
-    function checkLaserCollision() {
-      for (let l of lasers) {
-        if (l.state === 'active' && l.floorIndex === floor) {
-          shake = 2;
-          playSfx("miss");
-          triggerGameOver("laser");
-          break;
-        }
-      }
-    }
-
-    // ---------- Frame Updates ----------
     function update(dt) {
       if (state !== "playing") return;
 
@@ -1045,6 +1063,22 @@ canvas#game {
           }
         } else {
           hardBlockTimer = 0;
+        }
+      }
+
+      if (gameMode === "numberhard") {
+        const currentData = numberHardTiles[floor];
+        if (currentData && currentData.count > 0 && !isAnimating) {
+          numberHardTimer += dt;
+          const timeLimit = currentData.initial * 0.15 + 0.3;
+          if (numberHardTimer >= timeLimit) {
+            shake = 2;
+            playSfx("miss");
+            triggerGameOver("numberhard");
+            return;
+          }
+        } else {
+          numberHardTimer = 0;
         }
       }
 
@@ -1222,7 +1256,8 @@ canvas#game {
       let brickLineCol = colors.brickLine;
       let stepEdgeCol = colors.stepEdge;
 
-      if (gameMode === "hardblock" && hardBlockTiles.includes(idx)) {
+      if ((gameMode === "hardblock" && hardBlockTiles.includes(idx)) ||
+          (gameMode === "numberhard" && numberHardTiles[idx])) {
         brickCol = "#d32f2f";
         brickDarkCol = "#8e0000";
         brickLineCol = "#5f0000";
@@ -1251,6 +1286,26 @@ canvas#game {
         ctx.fillStyle = "#ffeb3b";
         ctx.font = "bold 10px sans-serif";
         ctx.fillText("🔥", x + w / 2 - 5, y - 5);
+      }
+
+      if (gameMode === "numberhard" && numberHardTiles[idx]) {
+        const tileData = numberHardTiles[idx];
+        if (tileData.count > 0) {
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "900 12px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(tileData.count, x + w / 2, y + 12);
+          ctx.textAlign = "left";
+
+          if (idx === floor) {
+            const timeLimit = tileData.initial * 0.15 + 0.3;
+            const remainingRatio = Math.max(0, 1 - (numberHardTimer / timeLimit));
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.fillRect(x + 2, y - 6, w - 4, 4);
+            ctx.fillStyle = remainingRatio < 0.3 ? "#ff1744" : "#ffea00";
+            ctx.fillRect(x + 2, y - 6, (w - 4) * remainingRatio, 4);
+          }
+        }
       }
 
       if (
