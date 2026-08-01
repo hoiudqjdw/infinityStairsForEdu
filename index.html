@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>무한의 계단 - 클론</title>
+<title>무한의 계단 - 숲속 모험</title>
 <style>
 * {
   box-sizing: border-box;
@@ -16,7 +16,7 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-  background: #14161f;
+  background: #0a0b12;
   overflow: hidden;
   font-family: "Courier New", ui-monospace, monospace;
   touch-action: none;
@@ -28,7 +28,7 @@ html, body {
   height: 100dvh;
   max-width: 480px;
   margin: 0 auto;
-  background: #202331;
+  background: #0d0e15;
   overflow: hidden;
   image-rendering: pixelated;
 }
@@ -59,11 +59,11 @@ canvas#game {
 #gaugeWrap {
   flex: 1;
   height: 20px;
-  background: #1a1c26;
-  border: 3px solid #0d0e14;
+  background: #11131c;
+  border: 3px solid #05060a;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: inset 0 2px 0 rgba(0,0,0,.4);
+  box-shadow: inset 0 2px 0 rgba(0,0,0,.6);
 }
 
 #gaugeFill {
@@ -95,16 +95,16 @@ canvas#game {
   width: 38px;
   height: 38px;
   flex-shrink: 0;
-  border: 3px solid #0d0e14;
+  border: 3px solid #05060a;
   border-radius: 8px;
-  background: #3a3f58;
+  background: #2a2d3d;
   color: #fff8e8;
   font-size: 16px;
   cursor: pointer;
 }
 
 #btnMute:active {
-  background: #232636;
+  background: #181a24;
 }
 
 /* ---------- Controls ---------- */
@@ -125,23 +125,23 @@ canvas#game {
   font-size: 42px;
   font-weight: bold;
   color: #fff8e8;
-  background: #3a3f58;
-  border-top: 4px solid #545a78;
+  background: #232636;
+  border-top: 4px solid #383d54;
   cursor: pointer;
   transition: background 0.05s;
 }
 
 .ctrlBtn:active,
 .ctrlBtn.pressed {
-  background: #232636;
+  background: #141622;
 }
 
 #btnLeft {
-  border-right: 2px solid #14161f;
+  border-right: 2px solid #0a0b12;
 }
 
 #btnRight {
-  border-left: 2px solid #14161f;
+  border-left: 2px solid #0a0b12;
 }
 
 /* ---------- Overlays ---------- */
@@ -149,7 +149,7 @@ canvas#game {
   position: absolute;
   inset: 0;
   z-index: 10;
-  background: rgba(10, 11, 18, 0.86);
+  background: rgba(6, 7, 12, 0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -202,10 +202,212 @@ canvas#game {
   border: 4px solid #b8871f;
   border-radius: 12px;
   cursor: pointer;
+  transition: background 0.1s;
 }
 
 .bigBtn:active {
   transform: translateY(2px);
+}
+
+.bigBtn:hover {
+  background: #ffe566;
+}
+
+/* ---------- Mode Selection ---------- */
+#modeSelection {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgba(6, 7, 12, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff8e8;
+  padding: 24px;
+  gap: 20px;
+}
+
+#modeSelection.hidden {
+  display: none;
+}
+
+#modeSelection h1 {
+  font-size: 32px;
+  margin: 0 0 10px;
+  color: #ffd25a;
+  text-shadow: 2px 2px 0 #7a4a10;
+}
+
+#modeButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.modeBtn {
+  flex: 1;
+  min-width: 100px;
+  max-width: 130px;
+  padding: 25px 10px;
+  font-size: 20px;
+  font-weight: bold;
+  border: 4px solid #b8871f;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#btnDay {
+  background: #ffd25a;
+  color: #4a3210;
+}
+
+#btnNight {
+  background: #3a3f58;
+  color: #fff8e8;
+  border-color: #505570;
+}
+
+#btnCustomModes {
+  background: #d84a3a;
+  color: #fff8e8;
+  border-color: #a83a2a;
+}
+
+.modeBtn span {
+  font-size: 32px;
+}
+
+/* ---------- Extra Modes Popup ---------- */
+#extraModesPopup {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  background: rgba(6, 7, 12, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff8e8;
+  padding: 24px;
+  gap: 20px;
+}
+
+#extraModesPopup.hidden {
+  display: none;
+}
+
+#extraModesList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 260px;
+}
+
+.extraModeBtn {
+  padding: 18px;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 12px;
+  border: 3px solid;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+#btnSelectThief {
+  background: #d84a3a;
+  color: #fff;
+  border-color: #a83a2a;
+}
+
+#btnSelectLaser {
+  background: #9c27b0;
+  color: #fff;
+  border-color: #6a1b9a;
+}
+
+#btnSelectInvis {
+  background: #3f51b5;
+  color: #fff;
+  border-color: #303f9f;
+}
+
+.btnBack {
+  margin-top: 10px;
+  padding: 8px 20px;
+  font-size: 14px;
+  background: #444;
+  color: #ccc;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ---------- Difficulty Selection ---------- */
+#difficultySelection {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  background: rgba(6, 7, 12, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff8e8;
+  padding: 24px;
+  gap: 20px;
+}
+
+#difficultySelection.hidden {
+  display: none;
+}
+
+#difficultySliderContainer {
+  width: 100%;
+  max-width: 300px;
+}
+
+#difficultySlider {
+  width: 100%;
+  height: 8px;
+  border-radius: 5px;
+  background: #3a3f58;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+#difficultySlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffd25a;
+  cursor: pointer;
+  border: 3px solid #b8871f;
+}
+
+#difficultyValue {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ffd25a;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -226,7 +428,57 @@ canvas#game {
       <button id="btnRight" class="ctrlBtn" aria-label="오른쪽">▶</button>
     </div>
 
-    <div id="startScreen" class="overlay">
+    <!-- 메인 모드 선택 -->
+    <div id="modeSelection" class="overlay">
+      <h1>무한의 계단</h1>
+      <p>모드를 선택하세요</p>
+      <div id="modeButtons">
+        <button id="btnDay" class="modeBtn">
+          <span>☀️</span>
+          <div>낮</div>
+        </button>
+        <button id="btnNight" class="modeBtn">
+          <span>🌙</span>
+          <div>밤</div>
+        </button>
+        <button id="btnCustomModes" class="modeBtn">
+          <span>🎮</span>
+          <div>모드</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- 모드 선택 팝업창 -->
+    <div id="extraModesPopup" class="overlay hidden">
+      <h1>특수 모드</h1>
+      <div id="extraModesList">
+        <button id="btnSelectThief" class="extraModeBtn">
+          <span>🔴</span> 도둑잡기
+        </button>
+        <button id="btnSelectLaser" class="extraModeBtn">
+          <span>⚡</span> 레이저 모드
+        </button>
+        <button id="btnSelectInvis" class="extraModeBtn">
+          <span>👻</span> 투명도 모드
+        </button>
+      </div>
+      <button id="btnBackToMain" class="btnBack">뒤로 가기</button>
+    </div>
+
+    <!-- 도둑잡기 난이도 선택 -->
+    <div id="difficultySelection" class="overlay hidden">
+      <h1>도둑잡기</h1>
+      <div id="difficultySliderContainer">
+        <div>난이도 선택</div>
+        <input type="range" id="difficultySlider" min="1" max="10" value="5">
+        <div id="difficultyValue">5</div>
+        <p class="small">난이도가 높을수록 도둑이 빠릅니다</p>
+      </div>
+      <button id="btnStartThief" class="bigBtn">시작하기</button>
+      <button id="btnBackFromThief" class="btnBack">뒤로 가기</button>
+    </div>
+
+    <div id="startScreen" class="overlay hidden">
       <h1>무한의 계단</h1>
       <p>계단이 꺾이는 방향에 맞춰<br>왼쪽 / 오른쪽 버튼을 누르세요!</p>
       <p class="small">방향키(← →)로도 조작할 수 있어요</p>
@@ -248,6 +500,7 @@ canvas#game {
     const stage = document.getElementById("stage");
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
+    const gaugeWrap = document.getElementById("gaugeWrap");
 
     let dpr = Math.max(1, window.devicePixelRatio || 1);
     let viewW = 0, viewH = 0;
@@ -265,35 +518,41 @@ canvas#game {
     resize();
 
     // ---------- Constants ----------
-    const STEP_DX = 46;   // horizontal distance per step (world units)
-    const STEP_DY = 44;   // vertical rise per step
-    const ANIM_MS = 140;  // step animation duration
+    const STEP_DX = 46;
+    const STEP_DY = 44;
+    const ANIM_MS = 140;
     const STUMBLE_MS = 220;
 
-    const TIME_MAX = 100;        // timer bar units, full at game start
-    const BASE_DRAIN_RATE = 9;   // units/sec passively drained
-    const TIME_BONUS = 7;        // units restored per correct step
+    const TIME_MAX = 100;
+    const BASE_DRAIN_RATE = 9;
+    const TIME_BONUS = 7;
 
     // ---------- Game state ----------
-    let state = "start"; // start | playing | gameover
-    let steps = [];       // {x, y, dir}  dir: 'L' | 'R' — direction needed to step onto this from previous
+    let state = "modeSelect";
+    let gameMode = null;
+    let thiefDifficulty = 5;
+    let steps = [];
     let currentIndex = 0;
     let curDir = "R";
-    let runRemaining = 3;
+    let runRemaining = 0;
 
-    let charPos = { x: 0, y: 0 };   // rendered (animated) position, world coords
-    let animFrom = null, animTo = null, animStart = 0, animKind = null; // 'move' | 'stumble'
+    let charPos = { x: 0, y: 0 };
+    let thiefPos = { x: 0, y: 0 };
+    let animFrom = null, animTo = null, animStart = 0, animKind = null;
     let isAnimating = false;
 
     let timeLeft = TIME_MAX;
     let floor = 0;
+    let thiefFloor = 10;
     let elapsedPlaying = 0;
     let lastTime = 0;
 
     let camera = { x: 0, y: 0 };
     let shake = 0;
 
-    const keys = {};
+    // ---------- Laser & Invis Mode Data ----------
+    let lasers = [];
+    let stairOpacity = 1.0;
 
     // ---------- Audio ----------
     const bgm = new Audio("audio/bgm.mp3");
@@ -335,10 +594,12 @@ canvas#game {
 
     function genNextStep(prev) {
       if (runRemaining <= 0) {
-        curDir = curDir === "R" ? "L" : "R";
-        const maxRun = Math.max(2, 5 - Math.floor(floor / 40));
-        runRemaining = 2 + Math.floor(Math.random() * (maxRun - 1));
+        curDir = Math.random() < 0.5 ? "L" : "R";
+        const minRun = 1;
+        const maxRun = Math.min(4, 2 + Math.floor(floor / 100));
+        runRemaining = minRun + Math.floor(Math.random() * (maxRun - minRun + 1));
       }
+      
       runRemaining--;
       const dx = curDir === "R" ? STEP_DX : -STEP_DX;
       return { x: prev.x + dx, y: prev.y - STEP_DY, dir: curDir };
@@ -354,47 +615,83 @@ canvas#game {
       steps = [makeStartStep()];
       currentIndex = 0;
       curDir = Math.random() < 0.5 ? "L" : "R";
-      runRemaining = 3;
+      runRemaining = 0;
       ensureBuffer();
 
       charPos = { x: steps[0].x, y: steps[0].y };
+      thiefPos = { x: steps[10].x, y: steps[10].y };
+      thiefFloor = 10;
       animFrom = animTo = null;
       isAnimating = false;
 
       timeLeft = TIME_MAX;
       floor = 0;
       elapsedPlaying = 0;
+      lasers = [];
+      stairOpacity = 1.0;
 
       camera.x = charPos.x;
       camera.y = charPos.y;
       shake = 0;
 
+      // 투명도 모드에서는 타임바(게이지) 완전 숨김
+      if (gameMode === "invis") {
+        gaugeWrap.style.display = "none";
+      } else {
+        gaugeWrap.style.display = "block";
+      }
+
       updateFloorLabel();
       updateGauge();
     }
 
-    // ---------- Input ----------
+    // ---------- Input & Game Logic ----------
     function tryStep(pressedDir) {
       if (state !== "playing") return;
       if (isAnimating) return;
 
       const target = steps[currentIndex + 1];
       if (target.dir === pressedDir) {
-        // success
         animFrom = { x: charPos.x, y: charPos.y };
         animTo = { x: target.x, y: target.y };
         animStart = performance.now();
         animKind = "move";
         isAnimating = true;
 
+        // 꺾이는 구간 확인 (직전 계단 방향과 다음 계단 방향 비교)
+        const prevDir = steps[currentIndex].dir;
+        const nextDir = target.dir;
+        const isTurn = (prevDir !== null && prevDir !== nextDir);
+
         currentIndex++;
         floor++;
-        timeLeft = Math.min(TIME_MAX, timeLeft + TIME_BONUS);
+        
+        // 투명도 모드 꺾임 처리:
+        // 꺾일 때마다 불투명해짐(시야 회복). 단, 층이 높을수록 회복량이 적어짐.
+        if (gameMode === "invis" && isTurn) {
+          // 0층에서 80% 회복, 층이 높아질수록 회복량이 줄어들어 최소 15%만 회복됨
+          const recovery = Math.max(0.15, 0.8 - floor * 0.005);
+          stairOpacity = Math.min(1.0, stairOpacity + recovery);
+        }
+
+        if (gameMode !== "thief" && gameMode !== "invis") {
+          timeLeft = Math.min(TIME_MAX, timeLeft + TIME_BONUS);
+        }
+        
         ensureBuffer();
         updateFloorLabel();
         playSfx("step");
+        
+        // 레이저 충돌 확인
+        if (gameMode === "laser") {
+          checkLaserCollision();
+        }
+
+        // 도둑잡기 모드
+        if (gameMode === "thief" && floor >= thiefFloor) {
+          triggerGameWin();
+        }
       } else {
-        // miss — a single wrong step ends the run immediately
         animFrom = { x: charPos.x, y: charPos.y };
         animTo = { x: charPos.x + (pressedDir === "R" ? 10 : -10), y: charPos.y };
         animStart = performance.now();
@@ -433,7 +730,89 @@ canvas#game {
     });
 
     document.getElementById("btnStart").addEventListener("click", () => { playSfx("click"); startGame(); });
-    document.getElementById("btnRetry").addEventListener("click", () => { playSfx("click"); startGame(); });
+    document.getElementById("btnRetry").addEventListener("click", () => { playSfx("click"); backToModeSelect(); });
+
+    // UI 모드 선택
+    const btnDay = document.getElementById("btnDay");
+    const btnNight = document.getElementById("btnNight");
+    const btnCustomModes = document.getElementById("btnCustomModes");
+    const extraModesPopup = document.getElementById("extraModesPopup");
+    const btnSelectThief = document.getElementById("btnSelectThief");
+    const btnSelectLaser = document.getElementById("btnSelectLaser");
+    const btnSelectInvis = document.getElementById("btnSelectInvis");
+    const btnBackToMain = document.getElementById("btnBackToMain");
+    const btnBackFromThief = document.getElementById("btnBackFromThief");
+
+    btnDay.addEventListener("click", () => { playSfx("click"); selectMode("day"); });
+    btnNight.addEventListener("click", () => { playSfx("click"); selectMode("night"); });
+
+    btnCustomModes.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.remove("hidden");
+    });
+
+    btnBackToMain.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+    });
+
+    btnSelectThief.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      document.getElementById("modeSelection").classList.add("hidden");
+      document.getElementById("difficultySelection").classList.remove("hidden");
+    });
+
+    btnSelectLaser.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      selectMode("laser");
+    });
+
+    btnSelectInvis.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      selectMode("invis");
+    });
+
+    btnBackFromThief.addEventListener("click", () => {
+      playSfx("click");
+      document.getElementById("difficultySelection").classList.add("hidden");
+      document.getElementById("modeSelection").classList.remove("hidden");
+    });
+
+    const difficultySlider = document.getElementById("difficultySlider");
+    const difficultyValue = document.getElementById("difficultyValue");
+
+    difficultySlider.addEventListener("input", (e) => {
+      thiefDifficulty = parseInt(e.target.value);
+      difficultyValue.textContent = thiefDifficulty;
+    });
+
+    document.getElementById("btnStartThief").addEventListener("click", () => {
+      playSfx("click");
+      gameMode = "thief";
+      state = "start";
+      document.getElementById("difficultySelection").classList.add("hidden");
+      document.getElementById("startScreen").classList.remove("hidden");
+    });
+
+    function selectMode(mode) {
+      gameMode = mode;
+      state = "start";
+      document.getElementById("modeSelection").classList.add("hidden");
+      document.getElementById("startScreen").classList.remove("hidden");
+    }
+
+    function backToModeSelect() {
+      gameMode = null;
+      state = "modeSelect";
+      document.getElementById("startScreen").classList.add("hidden");
+      document.getElementById("gameOverScreen").classList.add("hidden");
+      document.getElementById("difficultySelection").classList.add("hidden");
+      document.getElementById("extraModesPopup").classList.add("hidden");
+      document.getElementById("modeSelection").classList.remove("hidden");
+    }
 
     function startGame() {
       resetGame();
@@ -448,8 +827,23 @@ canvas#game {
       if (state !== "playing") return;
       state = "gameover";
       document.getElementById("finalFloor").textContent = floor;
-      document.getElementById("gameOverTitle").textContent =
-        reason === "miss" ? "헛디뎠다!" : "시간 초과!";
+      let title = "게임 오버";
+      if (reason === "miss") title = "헛디뎠다!";
+      else if (reason === "time") title = "시간 초과!";
+      else if (reason === "thief") title = "도둑을 놓쳤습니다!";
+      else if (reason === "laser") title = "레이저에 감전되었습니다!";
+      
+      document.getElementById("gameOverTitle").textContent = title;
+      document.getElementById("gameOverScreen").classList.remove("hidden");
+      bgm.pause();
+      playSfx("gameover");
+    }
+
+    function triggerGameWin() {
+      if (state !== "playing") return;
+      state = "gameover";
+      document.getElementById("finalFloor").textContent = floor;
+      document.getElementById("gameOverTitle").textContent = "도둑을 잡았습니다!";
       document.getElementById("gameOverScreen").classList.remove("hidden");
       bgm.pause();
       playSfx("gameover");
@@ -460,6 +854,7 @@ canvas#game {
     const floorNumEl = document.getElementById("floorNum");
 
     function updateGauge() {
+      if (gameMode === "invis") return;
       const pct = (timeLeft / TIME_MAX) * 100;
       gaugeFillEl.style.width = pct + "%";
       gaugeFillEl.style.background = pct <= 25
@@ -468,25 +863,82 @@ canvas#game {
           ? "linear-gradient(180deg, #ffcf5c, #d68a1f)"
           : "linear-gradient(180deg, #7ee88a, #2fa84a)";
     }
+    
     function updateFloorLabel() {
-      floorNumEl.textContent = floor;
+      if (gameMode === "thief") {
+        floorNumEl.textContent = floor + " / " + thiefFloor;
+      } else {
+        floorNumEl.textContent = floor;
+      }
     }
 
-    // ---------- Update ----------
+    // ---------- Laser Mode Logic ----------
+    function updateLasers(dt) {
+      const spawnAhead = 15;
+      for (let i = floor + 1; i <= floor + spawnAhead; i++) {
+        if (i % 4 === 0 && !lasers.some(l => l.floorIndex === i)) {
+          lasers.push({ floorIndex: i, timer: 0, state: 'warning' });
+        }
+      }
+
+      for (let l of lasers) {
+        l.timer += dt;
+        if (l.state === 'warning' && l.timer >= 1.5) {
+          l.state = 'active';
+          l.timer = 0;
+        } else if (l.state === 'active' && l.timer >= 0.5) {
+          l.state = 'done';
+        }
+      }
+
+      lasers = lasers.filter(l => l.state !== 'done');
+      checkLaserCollision();
+    }
+
+    function checkLaserCollision() {
+      for (let l of lasers) {
+        if (l.state === 'active' && l.floorIndex === floor) {
+          shake = 2;
+          playSfx("miss");
+          triggerGameOver("laser");
+          break;
+        }
+      }
+    }
+
+    // ---------- Frame Updates ----------
     function update(dt) {
       if (state !== "playing") return;
 
       elapsedPlaying += dt;
-      const rate = BASE_DRAIN_RATE + Math.min(6, floor / 30);
-      timeLeft = Math.max(0, timeLeft - rate * dt);
-      updateGauge();
+      
+      if (gameMode === "thief") {
+        thiefFloor = Math.floor(10 + (thiefDifficulty * elapsedPlaying * 0.5));
+        if (thiefFloor >= 150) {
+          triggerGameOver("thief");
+          return;
+        }
+        thiefPos = steps[thiefFloor] ? { x: steps[thiefFloor].x, y: steps[thiefFloor].y } : { x: 0, y: 0 };
+      } else if (gameMode === "invis") {
+        // 투명도 모드: 0.01초당 1% 투명도 추가 = 초당 100% 불투명도(opacity) 감소
+        stairOpacity = Math.max(0, stairOpacity - 1.0 * dt);
+      } else {
+        const additionalDrain = Math.min(50, floor / 8);
+        const rate = BASE_DRAIN_RATE + additionalDrain;
+        
+        timeLeft = Math.max(0, timeLeft - rate * dt);
+        updateGauge();
 
-      if (timeLeft <= 0) {
-        triggerGameOver("time");
-        return;
+        if (timeLeft <= 0) {
+          triggerGameOver("time");
+          return;
+        }
       }
 
-      // resolve animation
+      if (gameMode === "laser") {
+        updateLasers(dt);
+      }
+
       if (isAnimating) {
         const t = Math.min(1, (performance.now() - animStart) / (animKind === "move" ? ANIM_MS : STUMBLE_MS));
         const ease = 1 - Math.pow(1 - t, 2);
@@ -504,7 +956,6 @@ canvas#game {
         }
       }
 
-      // camera follows character
       const followSpeed = 10;
       camera.x += (charPos.x - camera.x) * Math.min(1, followSpeed * dt);
       camera.y += (charPos.y - camera.y) * Math.min(1, followSpeed * dt);
@@ -513,21 +964,37 @@ canvas#game {
     }
 
     // ---------- Rendering ----------
-    const COLORS = {
-      sky1: "#6ec6e8",
-      sky2: "#bfe8f2",
-      buildingA: "#3f7fae",
-      buildingB: "#356a92",
-      brick: "#c9a876",
-      brickDark: "#a8875a",
-      brickLine: "#8a6a42",
-      stepEdge: "#5a4326",
+    const COLORS_DAY = {
+      sky1: "#87ceeb",
+      sky2: "#e0f6ff",
+      brick: "#8b7355",
+      brickDark: "#6b5344",
+      brickLine: "#5a4433",
+      stepEdge: "#4a3420",
       skin: "#f0c090",
       hair: "#2b2118",
       shirt: "#2f5fa8",
       pants: "#28324a",
       tie: "#c23a3a",
     };
+
+    const COLORS_NIGHT = {
+      sky1: "#0b0d1a",
+      sky2: "#1c1e36",
+      brick: "#4a536b",
+      brickDark: "#2e3447",
+      brickLine: "#1e2230",
+      stepEdge: "#151821",
+      skin: "#f0c090",
+      hair: "#2b2118",
+      shirt: "#2f5fa8",
+      pants: "#28324a",
+      tie: "#c23a3a",
+    };
+
+    function getColors() {
+      return (gameMode === "night") ? COLORS_NIGHT : COLORS_DAY;
+    }
 
     function worldToScreen(wx, wy) {
       return {
@@ -537,51 +1004,116 @@ canvas#game {
     }
 
     function drawBackground() {
+      const colors = getColors();
       const g = ctx.createLinearGradient(0, 0, 0, viewH);
-      g.addColorStop(0, COLORS.sky1);
-      g.addColorStop(1, COLORS.sky2);
+      g.addColorStop(0, colors.sky1);
+      g.addColorStop(1, colors.sky2);
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, viewW, viewH);
 
-      // simple parallax buildings (blocky)
-      const parallax = camera.y * 0.35;
-      ctx.fillStyle = COLORS.buildingA;
-      for (let i = -2; i < 8; i++) {
-        const bw = 46;
-        const bx = (i * 70) - ((camera.x * 0.25 + 20) % 70);
-        const bh = 90 + ((i * 53) % 120);
-        const by = viewH - bh + (parallax % 200) - 100;
-        ctx.fillRect(bx, by, bw, bh + 400);
+      if (gameMode === "night") {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+        for (let s = 0; s < 20; s++) {
+          let sx = (s * 53 + 10) % viewW;
+          let sy = (s * 89 + 20) % (viewH * 0.4);
+          ctx.fillRect(sx, sy, 2, 2);
+        }
+
+        ctx.fillStyle = "rgba(255, 240, 180, 0.6)";
+        ctx.beginPath();
+        ctx.arc(viewW * 0.8, viewH * 0.15, 25, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        for (let c = 0; c < 5; c++) {
+          let cx = (c * 100) % viewW;
+          let cy = 30 + (c * 25) % 80;
+          ctx.fillRect(cx, cy, 40, 15);
+          ctx.beginPath();
+          ctx.arc(cx + 10, cy, 12, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(cx + 35, cy, 12, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
-      ctx.fillStyle = COLORS.buildingB;
-      for (let i = -2; i < 8; i++) {
-        const bw = 30;
-        const bx = 20 + (i * 90) - ((camera.x * 0.15 + 40) % 90);
-        const bh = 60 + ((i * 37) % 90);
-        const by = viewH - bh + (parallax % 260) - 130;
-        ctx.fillRect(bx, by, bw, bh + 400);
-      }
+
+      const parallax1 = camera.y * 0.25;
+      const treeColors1 = (gameMode === "night") ? ["#0a1a10", "#081410", "#06120c"] : ["#2d5a1f", "#1f4a15", "#15380d"];
+      drawTreeGroup(-200, viewH - 150 + (parallax1 % 300), treeColors1, 0.3, 50, 12);
+      drawTreeGroup(100, viewH - 140 + (parallax1 % 300), treeColors1, 0.3, 45, 10);
+      drawTreeGroup(350, viewH - 160 + (parallax1 % 300), treeColors1, 0.3, 55, 14);
+
+      const parallax2 = camera.y * 0.4;
+      const treeColors2 = (gameMode === "night") ? ["#1a3a1a", "#0f2a0f", "#0a2008"] : ["#4a8a3a", "#3a7a2a", "#2a6a1a"];
+      drawTreeGroup(-150, viewH - 100 + (parallax2 % 300), treeColors2, 0.5, 60, 16);
+      drawTreeGroup(80, viewH - 90 + (parallax2 % 300), treeColors2, 0.5, 55, 14);
+      drawTreeGroup(320, viewH - 110 + (parallax2 % 300), treeColors2, 0.5, 65, 18);
+
+      const parallax3 = camera.y * 0.55;
+      const treeColors3 = (gameMode === "night") ? ["#2a4a2a", "#1a3a1a", "#0f2f0f"] : ["#5aaa4a", "#4a9a3a", "#3a8a2a"];
+      drawTreeGroup(-100, viewH - 30 + (parallax3 % 300), treeColors3, 0.7, 70, 20);
+      drawTreeGroup(150, viewH - 20 + (parallax3 % 300), treeColors3, 0.7, 75, 22);
+      drawTreeGroup(400, viewH - 40 + (parallax3 % 300), treeColors3, 0.7, 80, 24);
     }
 
-    function drawStep(step) {
+    function drawTreeGroup(baseX, baseY, colors, alpha, trunkHeight, canopySize) {
+      ctx.globalAlpha = alpha;
+
+      ctx.fillStyle = colors[2];
+      const trunkWidth = Math.max(4, Math.floor(canopySize * 0.25));
+      ctx.fillRect(baseX - trunkWidth / 2, baseY - trunkHeight, trunkWidth, trunkHeight);
+
+      ctx.fillStyle = colors[0];
+      ctx.beginPath();
+      ctx.arc(baseX, baseY - trunkHeight - canopySize * 0.3, canopySize * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = colors[1];
+      ctx.beginPath();
+      ctx.arc(baseX - canopySize * 0.25, baseY - trunkHeight, canopySize * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(baseX + canopySize * 0.25, baseY - trunkHeight, canopySize * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = colors[0];
+      ctx.beginPath();
+      ctx.arc(baseX, baseY - trunkHeight + canopySize * 0.2, canopySize * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.globalAlpha = 1;
+    }
+
+    function drawStep(step, idx) {
+      const colors = getColors();
       const p = worldToScreen(step.x, step.y);
       const w = STEP_DX + 24;
       const h = 16;
       const x = p.x - w / 2;
       const y = p.y;
 
-      // shadow/support column down to bottom of screen
-      ctx.fillStyle = "rgba(0,0,0,0.12)";
-      ctx.fillRect(x + 6, y + h, w - 12, Math.max(0, viewH - (y + h)));
+      ctx.save();
+      // 투명도 모드일 경우 globalAlpha 적용
+      if (gameMode === "invis") {
+        ctx.globalAlpha = stairOpacity;
+      }
 
-      // brick platform
-      ctx.fillStyle = COLORS.brick;
+      // 투명도 모드에서는 뒤쪽 배경(하늘/나무)이 비쳐 보일 수 있도록 검은 기둥 대신 얇은 그림자만 렌더링
+      if (gameMode === "invis") {
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
+        ctx.fillRect(x + 4, y + h, w - 8, 8);
+      } else {
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        ctx.fillRect(x + 6, y + h, w - 12, Math.max(0, viewH - (y + h)));
+      }
+
+      ctx.fillStyle = colors.brick;
       ctx.fillRect(x, y, w, h);
-      ctx.fillStyle = COLORS.brickDark;
+      ctx.fillStyle = colors.brickDark;
       ctx.fillRect(x, y + h - 5, w, 5);
 
-      // brick pattern lines
-      ctx.strokeStyle = COLORS.brickLine;
+      ctx.strokeStyle = colors.brickLine;
       ctx.lineWidth = 1;
       const cell = 12;
       for (let cx = 0; cx < w; cx += cell) {
@@ -590,12 +1122,53 @@ canvas#game {
         ctx.lineTo(x + cx, y + h - 5);
         ctx.stroke();
       }
-      ctx.strokeStyle = COLORS.stepEdge;
+      ctx.strokeStyle = colors.stepEdge;
       ctx.lineWidth = 2;
       ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+
+      // 레이저 연출
+      if (gameMode === "laser") {
+        const laser = lasers.find(l => l.floorIndex === idx);
+        if (laser) {
+          if (laser.state === 'warning') {
+            const alpha = Math.sin(laser.timer * 15) * 0.3 + 0.5;
+            ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
+            ctx.fillRect(x, y - 5, w, h + 5);
+            ctx.fillStyle = "#ffeb3b";
+            ctx.font = "bold 12px sans-serif";
+            ctx.fillText("⚠️", x + w/2 - 6, y - 8);
+          } else if (laser.state === 'active') {
+            const laserTop = -300;
+            const laserHeight = y + h / 2 - laserTop;
+            const cx = x + w / 2;
+
+            ctx.fillStyle = "rgba(255, 0, 80, 0.35)";
+            ctx.fillRect(cx - 6, laserTop, 12, laserHeight);
+
+            ctx.fillStyle = "#ff0055";
+            ctx.fillRect(cx - 3, laserTop, 6, laserHeight);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(cx - 1, laserTop, 2, laserHeight);
+
+            ctx.fillStyle = "rgba(255, 0, 80, 0.85)";
+            ctx.beginPath();
+            ctx.ellipse(cx, y + h / 2 - 2, 10, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.ellipse(cx, y + h / 2 - 2, 4, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      ctx.restore();
     }
 
     function drawCharacter() {
+      const colors = getColors();
       const p = worldToScreen(charPos.x, charPos.y);
       const facing = curDir === "R" ? 1 : -1;
       const bob = isAnimating && animKind === "move" ? -6 : 0;
@@ -605,35 +1178,61 @@ canvas#game {
       ctx.translate(p.x + wobble, p.y - 30 + bob);
       ctx.scale(facing, 1);
 
-      // legs
-      ctx.fillStyle = COLORS.pants;
+      ctx.fillStyle = colors.pants;
       ctx.fillRect(-8, 14, 6, 12);
       ctx.fillRect(2, 14, 6, 12);
 
-      // torso
-      ctx.fillStyle = COLORS.shirt;
+      ctx.fillStyle = colors.shirt;
       ctx.fillRect(-9, -4, 18, 20);
 
-      // tie
-      ctx.fillStyle = COLORS.tie;
+      ctx.fillStyle = colors.tie;
       ctx.fillRect(-2, -3, 4, 12);
 
-      // arms
-      ctx.fillStyle = COLORS.shirt;
+      ctx.fillStyle = colors.shirt;
       ctx.fillRect(-13, -2, 5, 12);
       ctx.fillRect(8, -2, 5, 12);
 
-      // head
-      ctx.fillStyle = COLORS.skin;
+      ctx.fillStyle = colors.skin;
       ctx.fillRect(-8, -20, 16, 16);
 
-      // hair
-      ctx.fillStyle = COLORS.hair;
+      ctx.fillStyle = colors.hair;
       ctx.fillRect(-8, -22, 16, 5);
 
-      // eye
       ctx.fillStyle = "#1a1a1a";
       ctx.fillRect(4, -13, 2, 2);
+
+      ctx.restore();
+    }
+
+    function drawThief() {
+      const p = worldToScreen(thiefPos.x, thiefPos.y);
+      
+      ctx.save();
+      ctx.translate(p.x, p.y - 30);
+
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(-8, 14, 6, 12);
+      ctx.fillRect(2, 14, 6, 12);
+
+      ctx.fillStyle = "#d84a3a";
+      ctx.fillRect(-9, -4, 18, 20);
+
+      ctx.fillStyle = "#8b0000";
+      ctx.fillRect(-2, -3, 4, 12);
+
+      ctx.fillStyle = "#c23a2a";
+      ctx.fillRect(-13, -2, 5, 12);
+      ctx.fillRect(8, -2, 5, 12);
+
+      ctx.fillStyle = "#f0c090";
+      ctx.fillRect(-8, -20, 16, 16);
+
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(-8, -22, 16, 5);
+
+      ctx.fillStyle = "#000";
+      ctx.fillRect(4, -13, 2, 2);
+      ctx.fillRect(-6, -13, 2, 2);
 
       ctx.restore();
     }
@@ -650,7 +1249,11 @@ canvas#game {
 
       const lo = Math.max(0, currentIndex - 2);
       const hi = Math.min(steps.length - 1, currentIndex + 14);
-      for (let i = lo; i <= hi; i++) drawStep(steps[i]);
+      for (let i = lo; i <= hi; i++) drawStep(steps[i], i);
+
+      if (gameMode === "thief" && thiefFloor >= 10 && thiefFloor < 150) {
+        drawThief();
+      }
 
       drawCharacter();
 
@@ -669,7 +1272,6 @@ canvas#game {
       requestAnimationFrame(loop);
     }
 
-    resetGame();
     requestAnimationFrame(loop);
   })();
   </script>
