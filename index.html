@@ -464,6 +464,9 @@ canvas#game {
         <button id="btnSelectReverse" class="extraModeBtn">
           <span>🔄</span> 조작 반대
         </button>
+        <button id="btnSelectTeleport" class="extraModeBtn" style="background: #009688; color: #fff; border-color: #004d40;">
+          <span>🌀</span> 텔레포트
+        </button>
       </div>
       <button id="btnBackToMain" class="btnBack">뒤로 가기</button>
     </div>
@@ -558,6 +561,7 @@ canvas#game {
     let stairOpacity = 1.0;
     let controlsReversed = false;
     let reverseTiles = [];
+    let teleportTiles = [];
 
     // ---------- Audio ----------
     const bgm = new Audio("audio/bgm.mp3");
@@ -636,10 +640,14 @@ canvas#game {
       stairOpacity = 1.0;
       controlsReversed = false;
       reverseTiles = [];
+      teleportTiles = [];
       
       for (let i = 20; i < 500; i++) {
         if (Math.random() < 0.2) {
           reverseTiles.push(i);
+        }
+        if (Math.random() < 0.12) {
+          teleportTiles.push(i);
         }
       }
 
@@ -680,6 +688,17 @@ canvas#game {
         floor++;
         if (gameMode === "reverse" && reverseTiles.includes(floor)) {
           controlsReversed = !controlsReversed;
+        }
+
+        if (gameMode === "teleport" && teleportTiles.includes(floor)) {
+          const jump = Math.floor(Math.random() * 10) + 1;
+          currentIndex += jump;
+          floor += jump;
+          ensureBuffer();
+          charPos = { x: steps[currentIndex].x, y: steps[currentIndex].y };
+          if (steps[currentIndex].dir) curDir = steps[currentIndex].dir;
+          isAnimating = false;
+          shake = 1.5;
         }
         
         // 투명도 모드 꺾임 처리:
@@ -759,6 +778,8 @@ canvas#game {
     const btnSelectThief = document.getElementById("btnSelectThief");
     const btnSelectLaser = document.getElementById("btnSelectLaser");
     const btnSelectInvis = document.getElementById("btnSelectInvis");
+    const btnSelectReverse = document.getElementById("btnSelectReverse");
+    const btnSelectTeleport = document.getElementById("btnSelectTeleport");
     
     const btnBackToMain = document.getElementById("btnBackToMain");
     const btnBackFromThief = document.getElementById("btnBackFromThief");
@@ -800,6 +821,13 @@ canvas#game {
       extraModesPopup.classList.add("hidden");
       selectMode("reverse");
     });
+
+    btnSelectTeleport.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      selectMode("teleport");
+    });
+
     btnBackFromThief.addEventListener("click", () => {
       playSfx("click");
       document.getElementById("difficultySelection").classList.add("hidden");
@@ -1162,6 +1190,27 @@ canvas#game {
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 10px sans-serif";
         ctx.fillText("↔", x + w / 2 - 4, y - 4);
+      }
+
+      if (gameMode === "teleport" && teleportTiles.includes(idx)) {
+        const pulse = Math.sin(performance.now() / 150) * 2;
+        const orbX = x + w / 2;
+        const orbY = y - 12;
+        
+        const grad = ctx.createRadialGradient(orbX, orbY, 2, orbX, orbY, 10 + pulse);
+        grad.addColorStop(0, "rgba(255, 255, 255, 1)");
+        grad.addColorStop(0.4, "rgba(0, 229, 255, 0.9)");
+        grad.addColorStop(1, "rgba(124, 77, 255, 0)");
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(orbX, orbY, 10 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(orbX, orbY, 3, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       // 레이저 연출
