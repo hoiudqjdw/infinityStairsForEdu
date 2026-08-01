@@ -470,6 +470,9 @@ canvas#game {
         <button id="btnSelectHardBlock" class="extraModeBtn" style="background: #b71c1c; color: #fff; border-color: #7f0000;">
           <span>🧱</span> 하드블록
         </button>
+        <button id="btnSelectTimeAttack" class="extraModeBtn" style="background: #e65100; color: #fff; border-color: #bf360c;">
+          <span>⏱️</span> 타임어택
+        </button>
       </div>
       <button id="btnBackToMain" class="btnBack">뒤로 가기</button>
     </div>
@@ -638,7 +641,7 @@ canvas#game {
       animFrom = animTo = null;
       isAnimating = false;
 
-      timeLeft = TIME_MAX;
+      timeLeft = (gameMode === "timeattack") ? 10 : TIME_MAX;
       floor = 0;
       elapsedPlaying = 0;
       lasers = [];
@@ -724,7 +727,7 @@ canvas#game {
           stairOpacity = Math.min(1.0, stairOpacity + recovery);
         }
 
-        if (gameMode !== "thief" && gameMode !== "invis") {
+        if (gameMode !== "thief" && gameMode !== "invis" && gameMode !== "timeattack") {
           timeLeft = Math.min(TIME_MAX, timeLeft + TIME_BONUS);
         }
         
@@ -796,6 +799,7 @@ canvas#game {
     const btnSelectReverse = document.getElementById("btnSelectReverse");
     const btnSelectTeleport = document.getElementById("btnSelectTeleport");
     const btnSelectHardBlock = document.getElementById("btnSelectHardBlock");
+    const btnSelectTimeAttack = document.getElementById("btnSelectTimeAttack");
     
     const btnBackToMain = document.getElementById("btnBackToMain");
     const btnBackFromThief = document.getElementById("btnBackFromThief");
@@ -848,6 +852,12 @@ canvas#game {
       playSfx("click");
       extraModesPopup.classList.add("hidden");
       selectMode("hardblock");
+    });
+
+    btnSelectTimeAttack.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      selectMode("timeattack");
     });
 
     btnBackFromThief.addEventListener("click", () => {
@@ -931,7 +941,8 @@ canvas#game {
 
     function updateGauge() {
       if (gameMode === "invis") return;
-      const pct = (timeLeft / TIME_MAX) * 100;
+      const maxTime = (gameMode === "timeattack") ? 10 : TIME_MAX;
+      const pct = (timeLeft / maxTime) * 100;
       gaugeFillEl.style.width = pct + "%";
       gaugeFillEl.style.background = pct <= 25
         ? "linear-gradient(180deg, #ff6b5c, #c72a2a)"
@@ -998,6 +1009,14 @@ canvas#game {
       } else if (gameMode === "invis") {
         // 투명도 모드: 0.01초당 1% 투명도 추가 = 초당 100% 불투명도(opacity) 감소
         stairOpacity = Math.max(0, stairOpacity - 1.0 * dt);
+      } else if (gameMode === "timeattack") {
+        timeLeft = Math.max(0, timeLeft - dt);
+        updateGauge();
+
+        if (timeLeft <= 0) {
+          triggerGameOver("time");
+          return;
+        }
       } else {
         const additionalDrain = Math.min(50, floor / 8);
         const rate = BASE_DRAIN_RATE + additionalDrain;
