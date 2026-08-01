@@ -461,6 +461,9 @@ canvas#game {
         <button id="btnSelectInvis" class="extraModeBtn">
           <span>👻</span> 투명도 모드
         </button>
+        <button id="btnSelectReverse" class="extraModeBtn">
+          <span>🔄</span> 조작 반대
+        </button>
       </div>
       <button id="btnBackToMain" class="btnBack">뒤로 가기</button>
     </div>
@@ -553,6 +556,8 @@ canvas#game {
     // ---------- Laser & Invis Mode Data ----------
     let lasers = [];
     let stairOpacity = 1.0;
+    let controlsReversed = false;
+    let reverseTiles = [];
 
     // ---------- Audio ----------
     const bgm = new Audio("audio/bgm.mp3");
@@ -629,6 +634,14 @@ canvas#game {
       elapsedPlaying = 0;
       lasers = [];
       stairOpacity = 1.0;
+      controlsReversed = false;
+      reverseTiles = [];
+      
+      for (let i = 20; i < 500; i++) {
+        if (Math.random() < 0.2) {
+          reverseTiles.push(i);
+        }
+      }
 
       camera.x = charPos.x;
       camera.y = charPos.y;
@@ -665,6 +678,9 @@ canvas#game {
 
         currentIndex++;
         floor++;
+        if (gameMode === "reverse" && reverseTiles.includes(floor)) {
+          controlsReversed = !controlsReversed;
+        }
         
         // 투명도 모드 꺾임 처리:
         // 꺾일 때마다 불투명해짐(시야 회복). 단, 층이 높을수록 회복량이 적어짐.
@@ -705,6 +721,9 @@ canvas#game {
     }
 
     function pressButton(dir, btnEl) {
+      if (gameMode === "reverse" && controlsReversed) {
+       dir = dir === "L" ? "R" : "L";
+      }
       if (btnEl) {
         btnEl.classList.add("pressed");
         setTimeout(() => btnEl.classList.remove("pressed"), 100);
@@ -740,6 +759,7 @@ canvas#game {
     const btnSelectThief = document.getElementById("btnSelectThief");
     const btnSelectLaser = document.getElementById("btnSelectLaser");
     const btnSelectInvis = document.getElementById("btnSelectInvis");
+    
     const btnBackToMain = document.getElementById("btnBackToMain");
     const btnBackFromThief = document.getElementById("btnBackFromThief");
 
@@ -774,7 +794,12 @@ canvas#game {
       extraModesPopup.classList.add("hidden");
       selectMode("invis");
     });
-
+    
+    btnSelectReverse.addEventListener("click", () => {
+      playSfx("click");
+      extraModesPopup.classList.add("hidden");
+      selectMode("reverse");
+    });
     btnBackFromThief.addEventListener("click", () => {
       playSfx("click");
       document.getElementById("difficultySelection").classList.add("hidden");
@@ -1125,6 +1150,19 @@ canvas#game {
       ctx.strokeStyle = colors.stepEdge;
       ctx.lineWidth = 2;
       ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+      if (
+      gameMode === "reverse" &&
+        reverseTiles.includes(idx)
+      ) {
+        ctx.fillStyle = "#ff00ff";
+        ctx.beginPath();
+        ctx.arc(x + w / 2, y - 8, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 10px sans-serif";
+        ctx.fillText("↔", x + w / 2 - 4, y - 4);
+      }
 
       // 레이저 연출
       if (gameMode === "laser") {
